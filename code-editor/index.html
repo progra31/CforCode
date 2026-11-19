@@ -1,587 +1,1270 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CforCodeEditor</title>
+  <title>CforCodeEditor // Terminal IDE</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png">
+  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            editorDark: '#1e1e1e',
-            editorDarkHeader: '#252526',
-            editorDarkSidebar: '#333333',
-            editorLight: '#ffffff',
-            editorLightHeader: '#f3f4f6',
-          }
-        }
-      }
-    }
-  </script>
+  
+  <!-- Google Fonts: Fira Code & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- CodeMirror CSS & JS -->
+  
+  <!-- CodeMirror CSS & Modes -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/neo.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/darcula.min.css">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closetag.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
 
   <style>
-    /* Styling CodeMirror for flex layout */
+    :root {
+      --term-bg: #070907;
+      --term-panel: #0c100c;
+      --term-header: #111711;
+      --term-accent: #00ff41;
+      --term-accent-dim: rgba(0, 255, 65, 0.15);
+      --term-accent-glow: rgba(0, 255, 65, 0.4);
+      --term-text: #d4f7dc;
+      --term-muted: #5a7a61;
+    }
+
+    /* Variantes de thèmes Terminal */
+    body.theme-amber {
+      --term-bg: #0a0804;
+      --term-panel: #120e07;
+      --term-header: #1a140a;
+      --term-accent: #ffb000;
+      --term-accent-dim: rgba(255, 176, 0, 0.15);
+      --term-accent-glow: rgba(255, 176, 0, 0.4);
+      --term-text: #fae8c8;
+      --term-muted: #8a6d3b;
+    }
+
+    body.theme-cyan {
+      --term-bg: #050a0c;
+      --term-panel: #091216;
+      --term-header: #0e1c22;
+      --term-accent: #00f0ff;
+      --term-accent-dim: rgba(0, 240, 255, 0.15);
+      --term-accent-glow: rgba(0, 240, 255, 0.4);
+      --term-text: #d6f9fc;
+      --term-muted: #4b7d85;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Fira Code', monospace;
+    }
+
+    body {
+      background-color: var(--term-bg);
+      color: var(--term-text);
+      margin: 0;
+      overflow: hidden;
+    }
+
+    /* Effet subtil de scanlines CRT */
+    .crt-overlay {
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.18) 50%
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+
+    /* Classes utilitaires liées aux variables CSS */
+    .bg-term-main { background-color: var(--term-bg); }
+    .bg-term-panel { background-color: var(--term-panel); }
+    .bg-term-header { background-color: var(--term-header); }
+    .bg-term-accent-dim { background-color: var(--term-accent-dim); }
+    .text-term-accent { color: var(--term-accent); }
+    .text-term-muted { color: var(--term-muted); }
+    .border-term-accent { border-color: var(--term-accent); }
+    .border-term-dim { border-color: var(--term-accent-dim); }
+
+    .term-btn {
+      border: 1px solid var(--term-accent);
+      color: var(--term-accent);
+      background-color: transparent;
+      transition: all 0.15s ease;
+    }
+    .term-btn:hover {
+      background-color: var(--term-accent);
+      color: var(--term-bg);
+      box-shadow: 0 0 10px var(--term-accent-glow);
+    }
+
+    .term-btn-solid {
+      border: 1px solid var(--term-accent);
+      background-color: var(--term-accent);
+      color: var(--term-bg);
+      font-weight: 700;
+      transition: all 0.15s ease;
+    }
+    .term-btn-solid:hover {
+      filter: brightness(1.15);
+      box-shadow: 0 0 12px var(--term-accent-glow);
+    }
+
+    /* Curseur clignotant */
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    .cursor-blink {
+      animation: blink 1s infinite;
+    }
+
+    /* Personnalisation CodeMirror pour coller au thème Terminal */
     .CodeMirror {
       height: 100% !important;
-      font-family: 'Fira Code', monospace, monospace;
-      font-size: 14px;
+      background-color: var(--term-bg) !important;
+      color: var(--term-text) !important;
+      font-family: 'Fira Code', monospace !important;
+      font-size: 13.5px;
+      line-height: 1.5;
     }
-    .cm-wrapper {
-      height: calc(100% - 40px);
+    .CodeMirror-gutters {
+      background-color: var(--term-panel) !important;
+      border-right: 1px solid var(--term-accent-dim) !important;
     }
-    /* Splitter custom styling */
+    .CodeMirror-linenumber {
+      color: var(--term-muted) !important;
+    }
+    .CodeMirror-cursor {
+      border-left: 2px solid var(--term-accent) !important;
+    }
+    .CodeMirror-activeline-background {
+      background: var(--term-accent-dim) !important;
+    }
+    .CodeMirror-selected {
+      background: var(--term-accent-dim) !important;
+    }
+
+    /* Splitters */
     .resizer-h {
       cursor: col-resize;
-      width: 6px;
-      background-color: transparent;
+      width: 5px;
+      background-color: var(--term-accent-dim);
       transition: background-color 0.2s;
     }
     .resizer-h:hover, .resizer-h.dragging {
-      background-color: #3b82f6;
+      background-color: var(--term-accent);
     }
     .resizer-v {
       cursor: row-resize;
-      height: 6px;
-      background-color: transparent;
+      height: 5px;
+      background-color: var(--term-accent-dim);
       transition: background-color 0.2s;
     }
     .resizer-v:hover, .resizer-v.dragging {
-      background-color: #3b82f6;
+      background-color: var(--term-accent);
+    }
+
+    /* Scrollbars custom terminal */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--term-bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--term-accent-dim);
+      border: 1px solid var(--term-accent);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--term-accent);
     }
   </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen flex flex-col overflow-hidden font-sans">
+<body class="h-screen flex flex-col select-none">
 
-  <!-- En-tête / Barre d'outils -->
-  <header class="h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 flex items-center justify-between z-10 select-none">
-    <div class="flex items-center space-x-3">
-      <div class="flex items-center space-x-2 text-blue-600 dark:text-blue-400 font-bold text-lg tracking-tight">
-        <i class="fa-solid fa-code text-xl"></i>
-        <span>CforCodeEditor</span>
-      </div>
-      <span class="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded font-medium">IDE Web Live</span>
-    </div>
+  <!-- Overlay effet CRT subtil -->
+  <div class="fixed inset-0 crt-overlay z-50"></div>
 
-    <!-- Actions -->
-    <div class="flex items-center space-x-2">
-      <!-- Auto-run toggle -->
-      <label class="flex items-center space-x-2 cursor-pointer text-xs mr-2">
-        <input type="checkbox" id="autoRunToggle" checked class="rounded border-gray-400 text-blue-600 focus:ring-blue-500">
-        <span class="text-gray-600 dark:text-gray-400">Exécution Auto</span>
-      </label>
-
-      <!-- Bouton Exécuter -->
-      <button id="runBtn" class="flex items-center space-x-1.5 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm">
-        <i class="fa-solid fa-play text-xs"></i>
-        <span>Lancer</span>
-      </button>
-
-      <!-- Bouton Effacer -->
-      <button id="clearBtn" class="flex items-center space-x-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">
-        <i class="fa-solid fa-trash-can text-xs"></i>
-        <span>Effacer</span>
-      </button>
-
-      <!-- Bouton Télécharger -->
-      <button id="downloadBtn" class="flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm">
-        <i class="fa-solid fa-download text-xs"></i>
-        <span>Télécharger</span>
-      </button>
-
-      <div class="h-5 w-px bg-gray-300 dark:bg-gray-700 mx-1"></div>
-
-      <!-- Basculer le Thème -->
-      <button id="themeToggle" class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Changer de thème">
-        <i class="fa-solid fa-moon dark:hidden"></i>
-        <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- Zone Principale -->
-  <main class="flex-1 flex flex-col md:flex-row overflow-hidden relative" id="mainContainer">
-    
-    <!-- Section Éditeur de code (Gauche) -->
-    <div id="editorPanel" class="w-full md:w-1/2 flex flex-col h-1/2 md:h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+  <!-- ========================================================= -->
+  <!-- 1. ÉCRAN D'ACCUEIL / BOOT SCREEN (STYLE TERMINAL)         -->
+  <!-- ========================================================= -->
+  <div id="bootScreen" class="fixed inset-0 z-40 bg-term-main flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-2xl border border-term-accent bg-term-panel p-6 sm:p-8 shadow-2xl relative">
       
-      <!-- Barre des Onglets -->
-      <div class="flex items-center bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-2 pt-2 space-x-1 select-none">
-        <button class="tab-btn active px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-blue-500 bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 flex items-center space-x-2" data-tab="html">
-          <i class="fa-brands fa-html5 text-orange-500"></i>
-          <span>index.html</span>
-        </button>
-        <button class="tab-btn px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex items-center space-x-2" data-tab="css">
-          <i class="fa-brands fa-css3-alt text-blue-500"></i>
-          <span>style.css</span>
-        </button>
-        <button class="tab-btn px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex items-center space-x-2" data-tab="js">
-          <i class="fa-brands fa-js text-yellow-400"></i>
-          <span>script.js</span>
-        </button>
+      <!-- Barre supérieure de fenêtre terminal -->
+      <div class="flex items-center justify-between border-b border-term-dim pb-3 mb-6 text-xs text-term-muted">
+        <div class="flex items-center space-x-2">
+          <span class="inline-block w-2.5 h-2.5 bg-term-accent"></span>
+          <span>root@cforcode:~/boot_sequence</span>
+        </div>
+        <span>SYS_READY // v2.4</span>
       </div>
 
-      <!-- Conteneurs CodeMirror pour chaque langages -->
-      <div class="cm-wrapper relative flex-1">
-        <div id="htmlEditor" class="tab-content h-full"></div>
-        <div id="cssEditor" class="tab-content h-full hidden"></div>
-        <div id="jsEditor" class="tab-content h-full hidden"></div>
+      <!-- Logo & Titre -->
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-6">
+        <div class="w-20 h-20 border border-term-accent p-1.5 bg-term-main flex items-center justify-center shrink-0">
+          <img 
+            src="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png" 
+            alt="Logo CforCodeEditor" 
+            class="w-full h-full object-contain"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          >
+          <div class="hidden w-full h-full items-center justify-center text-term-accent text-2xl font-bold">
+            &lt;/&gt;
+          </div>
+        </div>
+        <div class="text-center sm:text-left">
+          <h1 class="text-2xl sm:text-3xl font-bold text-term-accent tracking-wider">
+            CforCodeEditor<span class="cursor-blink">_</span>
+          </h1>
+          <p class="text-xs sm:text-sm text-term-muted mt-1">
+            Environnement de développement web interactif en ligne de commande.
+          </p>
+        </div>
       </div>
-    </div>
 
-    <!-- Redimensionneur Horizontal (Desktop) -->
-    <div id="resizerH" class="resizer-h hidden md:block z-20"></div>
+      <!-- Prompt de sélection -->
+      <div class="border-t border-term-dim pt-5">
+        <p class="text-xs sm:text-sm mb-4">
+          <span class="text-term-accent font-bold">user@cforcode:~$</span> Sélectionnez un mode d'initialisation de l'espace de travail :
+        </p>
 
-    <!-- Section Aperçu & Console (Droite) -->
-    <div id="previewPanel" class="w-full md:w-1/2 flex flex-col h-1/2 md:h-full bg-gray-50 dark:bg-gray-950 overflow-hidden">
-      
-      <!-- Zone d'Aperçu Web -->
-      <div id="iframeContainer" class="flex-1 flex flex-col h-2/3 min-h-[150px]">
-        <div class="h-9 bg-gray-200 dark:bg-gray-800 px-4 flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-gray-400 border-b border-gray-300 dark:border-gray-700 select-none">
-          <span class="flex items-center space-x-2">
-            <i class="fa-solid fa-desktop"></i>
-            <span>Aperçu en direct</span>
-          </span>
-          <button id="refreshPreview" class="hover:text-blue-500 transition-colors" title="Rafraîchir l'aperçu">
-            <i class="fa-solid fa-rotate-right"></i>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Option 1 : Programme de base -->
+          <button id="btnBootDefault" class="text-left border border-term-accent bg-term-main hover:bg-term-accent-dim p-4 transition-all group cursor-pointer focus:outline-none">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-term-accent font-bold text-sm group-hover:underline">[1] PROGRAMME DE BASE</span>
+              <i class="fa-solid fa-folder-open text-term-accent text-xs"></i>
+            </div>
+            <p class="text-xs text-term-muted leading-relaxed">
+              Charge l'environnement avec les fichiers d'exemple (<span class="text-term-text">index.html</span>, <span class="text-term-text">style.css</span>, <span class="text-term-text">script.js</span>) prêts à être exécutés et modifiés.
+            </p>
+          </button>
+
+          <!-- Option 2 : Programme vide -->
+          <button id="btnBootEmpty" class="text-left border border-term-accent bg-term-main hover:bg-term-accent-dim p-4 transition-all group cursor-pointer focus:outline-none">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-term-accent font-bold text-sm group-hover:underline">[2] PROGRAMME VIDE</span>
+              <i class="fa-solid fa-terminal text-term-accent text-xs"></i>
+            </div>
+            <p class="text-xs text-term-muted leading-relaxed">
+              Démarre une session vierge sans aucun fichier ouvert. Créez votre architecture à partir de zéro (<span class="text-term-text">+ Nouveau fichier</span>).
+            </p>
           </button>
         </div>
-        <iframe id="previewIframe" class="w-full flex-1 bg-white border-0" sandbox="allow-scripts allow-modals flex flex-col"></iframe>
       </div>
 
-      <!-- Redimensionneur Vertical (Entre Preview et Console) -->
-      <div id="resizerV" class="resizer-v z-20"></div>
+      <!-- Sélecteur de couleur terminal sur l'accueil -->
+      <div class="mt-6 pt-4 border-t border-term-dim flex items-center justify-between text-xs text-term-muted">
+        <span>Phosphore écran :</span>
+        <div class="flex items-center space-x-2">
+          <button onclick="setTerminalTheme('matrix')" class="px-2 py-0.5 border border-[#00ff41] text-[#00ff41] hover:bg-[#00ff41] hover:text-black text-[11px]">VERT</button>
+          <button onclick="setTerminalTheme('amber')" class="px-2 py-0.5 border border-[#ffb000] text-[#ffb000] hover:bg-[#ffb000] hover:text-black text-[11px]">AMBRE</button>
+          <button onclick="setTerminalTheme('cyan')" class="px-2 py-0.5 border border-[#00f0ff] text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black text-[11px]">CYAN</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      <!-- Zone Console Log -->
-      <div id="consoleContainer" class="h-1/3 min-h-[100px] flex flex-col bg-gray-900 border-t border-gray-800">
-        <div class="h-8 bg-gray-800 px-4 flex items-center justify-between text-xs font-mono text-gray-400 select-none">
-          <span class="flex items-center space-x-2">
-            <i class="fa-solid fa-terminal text-green-400"></i>
-            <span class="font-bold text-gray-300">Console</span>
+  <!-- ========================================================= -->
+  <!-- 2. INTERFACE PRINCIPALE DE L'ÉDITEUR (IDE TERMINAL)       -->
+  <!-- ========================================================= -->
+  <div id="ideWorkspace" class="hidden flex-1 flex flex-col h-full overflow-hidden">
+
+    <!-- Barre d'en-tête -->
+    <header class="h-12 bg-term-header border-b border-term-accent px-3 flex items-center justify-between shrink-0">
+      
+      <!-- Logo & Identité -->
+      <div class="flex items-center space-x-3">
+        <button id="btnReturnBoot" class="flex items-center space-x-2.5 hover:opacity-80 transition-opacity text-left" title="Retourner à l'écran d'accueil">
+          <img 
+            src="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png" 
+            alt="Logo" 
+            class="w-7 h-7 object-contain border border-term-accent p-0.5 bg-term-main"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"
+          >
+          <span class="hidden text-term-accent font-bold border border-term-accent px-1.5 py-0.5 text-xs">&lt;/&gt;</span>
+          <div>
+            <span class="font-bold text-term-accent text-sm sm:text-base tracking-wide">CforCodeEditor</span>
+          </div>
+        </button>
+        <span class="hidden lg:inline-block text-xs text-term-muted border-l border-term-dim pl-3">
+          user@cforcode:~/workspace$
+        </span>
+      </div>
+
+      <!-- Barre d'outils / Actions -->
+      <div class="flex items-center space-x-1.5 sm:space-x-2">
+        
+        <!-- Auto-Run -->
+        <label class="hidden sm:flex items-center space-x-1.5 cursor-pointer text-xs text-term-muted hover:text-term-text mr-1 border border-term-dim px-2 py-1">
+          <input type="checkbox" id="autoRunToggle" checked class="accent-current">
+          <span>AUTO_RUN</span>
+        </label>
+
+        <!-- Bouton Exécuter -->
+        <button id="runBtn" class="term-btn-solid px-2.5 sm:px-3 py-1 text-xs flex items-center space-x-1.5 cursor-pointer" title="Exécuter le projet (Ctrl+S)">
+          <i class="fa-solid fa-play text-[10px]"></i>
+          <span>RUN</span>
+        </button>
+
+        <!-- Bouton Télécharger / Export -->
+        <button id="downloadBtn" class="term-btn px-2.5 py-1 text-xs flex items-center space-x-1.5 cursor-pointer" title="Exporter le projet compilé en HTML">
+          <i class="fa-solid fa-download text-[10px]"></i>
+          <span class="hidden md:inline">EXPORT</span>
+        </button>
+
+        <!-- Bouton Menu Accueil -->
+        <button id="menuBtn" class="term-btn px-2.5 py-1 text-xs flex items-center space-x-1.5 cursor-pointer" title="Changer de mode (Base / Vide)">
+          <i class="fa-solid fa-power-off text-[10px]"></i>
+          <span class="hidden md:inline">MODE</span>
+        </button>
+
+        <!-- Sélecteur rapide de couleur Terminal -->
+        <button id="cycleThemeBtn" class="term-btn px-2 py-1 text-xs cursor-pointer" title="Changer la couleur du terminal (Vert / Ambre / Cyan)">
+          <i class="fa-solid fa-palette"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Corps de l'IDE -->
+    <main id="mainContainer" class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+
+      <!-- ===================================== -->
+      <!-- EXPLORATEUR DE FICHIERS (SIDEBAR)     -->
+      <!-- ===================================== -->
+      <aside id="fileExplorer" class="w-full md:w-56 bg-term-panel border-b md:border-b-0 md:border-r border-term-dim flex flex-col shrink-0 max-h-40 md:max-h-none">
+        
+        <!-- En-tête explorateur -->
+        <div class="h-9 px-3 bg-term-header border-b border-term-dim flex items-center justify-between text-xs">
+          <span class="font-bold text-term-accent tracking-wider flex items-center space-x-1.5">
+            <i class="fa-solid fa-folder-tree"></i>
+            <span>FICHIERS</span>
           </span>
-          <button id="clearConsoleBtn" class="hover:text-white transition-colors" title="Effacer la console">
-            <i class="fa-solid fa-ban"></i>
+          <button id="btnAddFile" class="term-btn px-2 py-0.5 text-[11px] font-bold flex items-center space-x-1 cursor-pointer" title="Ajouter un nouveau fichier">
+            <i class="fa-solid fa-plus"></i>
+            <span>NOUVEAU</span>
           </button>
         </div>
-        <div id="consoleOutput" class="flex-1 p-3 font-mono text-xs overflow-y-auto space-y-1.5 text-gray-300">
-          <!-- Logs générés dynamiquement ici -->
+
+        <!-- Liste dynamique des fichiers -->
+        <div id="fileList" class="flex-1 overflow-y-auto p-1.5 space-y-1 text-xs">
+          <!-- Généré dynamiquement par JS -->
         </div>
+
+        <!-- Pied de sidebar : infos -->
+        <div class="hidden md:flex h-7 px-3 border-t border-term-dim items-center justify-between text-[10px] text-term-muted">
+          <span id="fileCountLabel">0 fichier(s)</span>
+          <span>UTF-8</span>
+        </div>
+      </aside>
+
+      <!-- ===================================== -->
+      <!-- ZONE D'ÉDITION DE CODE                -->
+      <!-- ===================================== -->
+      <section id="editorPanel" class="w-full md:w-1/2 flex-1 flex flex-col bg-term-main overflow-hidden min-h-[200px]">
+        
+        <!-- Barre des onglets ouverts -->
+        <div id="tabsBar" class="h-9 bg-term-header border-b border-term-dim flex items-center overflow-x-auto px-1 space-x-1 shrink-0">
+          <!-- Onglets générés dynamiquement -->
+        </div>
+
+        <!-- Conteneur CodeMirror -->
+        <div id="codeMirrorContainer" class="flex-1 relative overflow-hidden">
+          <textarea id="codeTextarea"></textarea>
+        </div>
+
+        <!-- État vide (affiché lorsqu'aucun fichier n'existe ou n'est sélectionné) -->
+        <div id="emptyEditorState" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center bg-term-main">
+          <div class="border border-term-dim bg-term-panel p-6 max-w-md">
+            <div class="text-term-accent text-3xl mb-3">
+              <i class="fa-solid fa-terminal"></i>
+            </div>
+            <h2 class="text-sm font-bold text-term-accent mb-2">AUCUN FICHIER DANS L'ESPACE DE TRAVAIL</h2>
+            <p class="text-xs text-term-muted mb-5 leading-relaxed">
+              Le répertoire courant est vide. Créez un fichier (<span class="text-term-text">index.html</span>, <span class="text-term-text">style.css</span>, <span class="text-term-text">app.js</span>...) pour commencer à coder.
+            </p>
+            <button id="btnEmptyAddFile" class="term-btn-solid px-4 py-2 text-xs cursor-pointer inline-flex items-center space-x-2">
+              <i class="fa-solid fa-plus"></i>
+              <span>+ CRÉER UN FICHIER</span>
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Séparateur horizontal redimensionnable -->
+      <div id="resizerH" class="resizer-h hidden md:block z-20"></div>
+
+      <!-- ===================================== -->
+      <!-- APERÇU EN DIRECT & CONSOLE            -->
+      <!-- ===================================== -->
+      <section id="previewPanel" class="w-full md:w-2/5 flex flex-col h-1/2 md:h-full bg-term-main border-t md:border-t-0 border-term-dim overflow-hidden">
+        
+        <!-- Zone Iframe Aperçu -->
+        <div id="iframeContainer" class="flex-1 flex flex-col h-2/3 min-h-[120px]">
+          <div class="h-9 bg-term-header px-3 flex items-center justify-between text-xs border-b border-term-dim shrink-0">
+            <span class="flex items-center space-x-2 text-term-accent font-semibold">
+              <i class="fa-solid fa-display"></i>
+              <span>STDOUT // APERÇU</span>
+            </span>
+            <div class="flex items-center space-x-2">
+              <span id="previewFileBadge" class="text-[10px] text-term-muted"></span>
+              <button id="refreshPreview" class="text-term-muted hover:text-term-accent transition-colors cursor-pointer" title="Rafraîchir le rendu">
+                <i class="fa-solid fa-rotate-right"></i>
+              </button>
+            </div>
+          </div>
+          <iframe id="previewIframe" class="w-full flex-1 bg-white border-0" sandbox="allow-scripts allow-modals"></iframe>
+        </div>
+
+        <!-- Séparateur vertical redimensionnable -->
+        <div id="resizerV" class="resizer-v z-20"></div>
+
+        <!-- Zone Console Interactive -->
+        <div id="consoleContainer" class="h-1/3 min-h-[110px] flex flex-col bg-term-bg border-t border-term-dim">
+          <div class="h-8 bg-term-header px-3 flex items-center justify-between text-xs border-b border-term-dim shrink-0">
+            <span class="flex items-center space-x-2 text-term-accent font-bold">
+              <i class="fa-solid fa-terminal"></i>
+              <span>CONSOLE_LOG</span>
+            </span>
+            <button id="clearConsoleBtn" class="text-[11px] text-term-muted hover:text-term-accent transition-colors cursor-pointer">
+              [CLEAR]
+            </button>
+          </div>
+
+          <!-- Logs -->
+          <div id="consoleOutput" class="flex-1 p-2.5 text-xs overflow-y-auto space-y-1 select-text"></div>
+
+          <!-- Prompt d'exécution JS direct dans la console -->
+          <div class="h-8 border-t border-term-dim bg-term-panel px-2 flex items-center space-x-2 shrink-0">
+            <span class="text-term-accent text-xs font-bold">&gt;</span>
+            <input 
+              type="text" 
+              id="consoleInput" 
+              placeholder="Exécuter une commande JS..." 
+              class="flex-1 bg-transparent text-xs text-term-text focus:outline-none placeholder-term-muted"
+              autocomplete="off"
+            >
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 3. MODALE STYLE TERMINAL (CRÉATION / RENOMMAGE FICHIER)   -->
+  <!-- ========================================================= -->
+  <div id="fileModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+    <div class="w-full max-w-md border border-term-accent bg-term-panel p-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-term-dim pb-2.5 mb-4">
+        <span id="modalTitle" class="text-xs font-bold text-term-accent tracking-wider">
+          &gt; NOUVEAU_FICHIER
+        </span>
+        <button id="btnCloseModal" class="text-term-muted hover:text-term-accent text-sm cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
 
+      <form id="fileModalForm" class="space-y-4">
+        <div>
+          <label for="fileNameInput" class="block text-xs text-term-muted mb-1.5">
+            Nom du fichier avec extension (ex: <span class="text-term-text">app.js</span>, <span class="text-term-text">page.html</span>, <span class="text-term-text">theme.css</span>) :
+          </label>
+          <div class="flex items-center border border-term-accent bg-term-main px-2.5 py-2">
+            <span class="text-term-accent text-xs mr-2">$ touch</span>
+            <input 
+              type="text" 
+              id="fileNameInput" 
+              class="flex-1 bg-transparent text-xs text-term-text focus:outline-none" 
+              placeholder="nouveau_fichier.js"
+              required
+              autocomplete="off"
+            >
+          </div>
+          <p id="modalErrorMsg" class="hidden text-[11px] text-red-400 mt-1.5"></p>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" id="btnCancelModal" class="term-btn px-3 py-1.5 text-xs cursor-pointer">
+            ANNULER
+          </button>
+          <button type="submit" class="term-btn-solid px-4 py-1.5 text-xs cursor-pointer">
+            VALIDER
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
 
-  </main>
-
+  <!-- ========================================================= -->
+  <!-- JAVASCRIPT DE L'APPLICATION                               -->
+  <!-- ========================================================= -->
   <script>
-    // --- Codes de démonstration initiales ---
-    const initialHTML = `<!DOCTYPE html>
+    // --- 1. FICHIERS PAR DÉFAUT ("PROGRAMME DE BASE") ---
+    const DEFAULT_PROJECT_FILES = [
+      {
+        id: 'file-1',
+        name: 'index.html',
+        content: `<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <title>Démo CforCodeEditor</title>
 </head>
 <body>
-  <div class="card">
-    <h1>✨ CforCodeEditor</h1>
-    <p>Bienvenue dans votre éditeur de code interactif en temps réel !</p>
-    <div class="counter-box">
-      <p>Compteur : <span id="count">0</span></p>
-      <button id="btnInc">Incrementer</button>
-      <button id="btnReset">Réinitialiser</button>
+  <div class="terminal-card">
+    <div class="badge">SYSTEM // ONLINE</div>
+    <h1>&gt;_ CforCodeEditor</h1>
+    <p>Bienvenue dans votre espace de développement interactif style Terminal !</p>
+    
+    <div class="counter-panel">
+      <div class="label">COMPTEUR D'IMPULSIONS :</div>
+      <div id="count" class="value">0</div>
+      <div class="actions">
+        <button id="btnInc">[ + INCRÉMENTER ]</button>
+        <button id="btnReset" class="secondary">[ RESET ]</button>
+      </div>
     </div>
   </div>
 </body>
-</html>`;
-
-    const initialCSS = `body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+</html>`
+      },
+      {
+        id: 'file-2',
+        name: 'style.css',
+        content: `body {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #070907;
+  color: #00ff41;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   margin: 0;
+  padding: 1rem;
 }
 
-.card {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+.terminal-card {
+  background: #0d120d;
+  border: 1px solid #00ff41;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
   text-align: center;
-  max-width: 400px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  border: 1px solid #00ff41;
+  padding: 0.2rem 0.6rem;
+  margin-bottom: 1rem;
+  letter-spacing: 2px;
 }
 
 h1 {
-  color: #333;
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.6rem;
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
 }
 
 p {
-  color: #666;
-  font-size: 0.95rem;
+  color: #8ab894;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
-.counter-box {
+.counter-panel {
   margin-top: 1.5rem;
-  padding: 1rem;
-  background: #f7fafc;
-  border-radius: 8px;
+  padding: 1.2rem;
+  border: 1px dashed #00ff41;
+  background: rgba(0, 255, 65, 0.04);
 }
 
-#count {
+.label {
+  font-size: 0.75rem;
+  color: #8ab894;
+}
+
+.value {
+  font-size: 2.5rem;
   font-weight: bold;
-  font-size: 1.25rem;
-  color: #4c51bf;
+  margin: 0.5rem 0;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
 }
 
 button {
-  background: #4c51bf;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  margin: 0.25rem;
-  border-radius: 6px;
+  background: #00ff41;
+  color: #070907;
+  border: 1px solid #00ff41;
+  padding: 0.5rem 0.9rem;
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 0.8rem;
   cursor: pointer;
-  font-weight: 600;
-  transition: transform 0.1s, background-color 0.2s;
+  transition: all 0.15s;
 }
 
 button:hover {
-  background: #434190;
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
 }
 
-button:active {
-  transform: scale(0.95);
-}`;
+button.secondary {
+  background: transparent;
+  color: #00ff41;
+}
 
-    const initialJS = `// Écrivez votre code JavaScript ici !
+button.secondary:hover {
+  background: rgba(0, 255, 65, 0.15);
+}`
+      },
+      {
+        id: 'file-3',
+        name: 'script.js',
+        content: `// Script interactif CforCodeEditor
 let count = 0;
 
 const countDisplay = document.getElementById('count');
 const btnInc = document.getElementById('btnInc');
 const btnReset = document.getElementById('btnReset');
 
-console.log("Initialisation de l'application réussie !");
+console.log("[SYSTEM] Programme de base chargé avec succès.");
 
-btnInc.addEventListener('click', () => {
-  count++;
-  countDisplay.textContent = count;
-  console.log("Nouveau compte :", count);
-});
+if (btnInc && btnReset) {
+  btnInc.addEventListener('click', () => {
+    count++;
+    countDisplay.textContent = count;
+    console.log("Impulsion enregistrée -> Valeur :", count);
+  });
 
-btnReset.addEventListener('click', () => {
-  count = 0;
-  countDisplay.textContent = count;
-  console.log("Compteur réinitialisé.");
-});`;
+  btnReset.addEventListener('click', () => {
+    count = 0;
+    countDisplay.textContent = count;
+    console.warn("Compteur remis à zéro.");
+  });
+}`
+      }
+    ];
 
-    // --- Initialisation de CodeMirror ---
-    let editors = {};
+    // --- 2. ÉTAT GLOBAL DE L'APPLICATION ---
+    let files = [];
+    let activeFileId = null;
+    let cmInstance = null;
+    let isUpdatingEditor = false;
+    let modalMode = 'create'; // 'create' ou 'rename'
+    let targetRenameId = null;
 
-    function initEditors() {
-      const darkTheme = document.documentElement.classList.contains('dark');
-      const theme = darkTheme ? 'dracula' : 'neo';
+    // --- 3. RÉFÉRENCES DOM ---
+    const bootScreen = document.getElementById('bootScreen');
+    const ideWorkspace = document.getElementById('ideWorkspace');
+    const fileListEl = document.getElementById('fileList');
+    const tabsBarEl = document.getElementById('tabsBar');
+    const fileCountLabel = document.getElementById('fileCountLabel');
+    const codeMirrorContainer = document.getElementById('codeMirrorContainer');
+    const emptyEditorState = document.getElementById('emptyEditorState');
+    const previewIframe = document.getElementById('previewIframe');
+    const previewFileBadge = document.getElementById('previewFileBadge');
+    const consoleOutput = document.getElementById('consoleOutput');
+    const consoleInput = document.getElementById('consoleInput');
 
-      editors.html = CodeMirror(document.getElementById('htmlEditor'), {
-        value: initialHTML,
+    // Modale
+    const fileModal = document.getElementById('fileModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const fileModalForm = document.getElementById('fileModalForm');
+    const fileNameInput = document.getElementById('fileNameInput');
+    const modalErrorMsg = document.getElementById('modalErrorMsg');
+
+    // --- 4. GESTION DU THÈME TERMINAL ---
+    const themes = ['matrix', 'amber', 'cyan'];
+    let currentThemeIndex = 0;
+
+    function setTerminalTheme(themeName) {
+      document.body.classList.remove('theme-amber', 'theme-cyan');
+      if (themeName === 'amber') {
+        document.body.classList.add('theme-amber');
+        currentThemeIndex = 1;
+      } else if (themeName === 'cyan') {
+        document.body.classList.add('theme-cyan');
+        currentThemeIndex = 2;
+      } else {
+        currentThemeIndex = 0;
+      }
+      if (cmInstance) cmInstance.refresh();
+    }
+
+    document.getElementById('cycleThemeBtn').addEventListener('click', () => {
+      currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+      setTerminalTheme(themes[currentThemeIndex]);
+    });
+
+    // --- 5. INITIALISATION DE CODEMIRROR ---
+    function initCodeMirror() {
+      if (cmInstance) return;
+      cmInstance = CodeMirror.fromTextArea(document.getElementById('codeTextarea'), {
         mode: 'htmlmixed',
-        theme: theme,
+        theme: 'darcula',
         lineNumbers: true,
         autoCloseTags: true,
+        autoCloseBrackets: true,
+        styleActiveLine: true,
         tabSize: 2,
-        lineWrapping: true
+        indentUnit: 2,
+        lineWrapping: true,
+        extraKeys: {
+          'Ctrl-S': function() { updatePreview(); },
+          'Cmd-S': function() { updatePreview(); }
+        }
       });
 
-      editors.css = CodeMirror(document.getElementById('cssEditor'), {
-        value: initialCSS,
-        mode: 'css',
-        theme: theme,
-        lineNumbers: true,
-        tabSize: 2,
-        lineWrapping: true
-      });
-
-      editors.js = CodeMirror(document.getElementById('jsEditor'), {
-        value: initialJS,
-        mode: 'javascript',
-        theme: theme,
-        lineNumbers: true,
-        tabSize: 2,
-        lineWrapping: true
-      });
-
-      // Écouter les changements pour la mise à jour automatique
-      Object.keys(editors).forEach(key => {
-        editors[key].on('change', () => {
+      cmInstance.on('change', () => {
+        if (isUpdatingEditor || !activeFileId) return;
+        const currentFile = files.find(f => f.id === activeFileId);
+        if (currentFile) {
+          currentFile.content = cmInstance.getValue();
           if (document.getElementById('autoRunToggle').checked) {
-            debounceUpdate();
+            debouncePreview();
           }
-        });
+        }
       });
     }
 
-    // --- Gestion des onglets ---
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+    // Détecter le mode CodeMirror et l'icône selon l'extension du fichier
+    function getFileMetadata(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      switch (ext) {
+        case 'html':
+        case 'htm':
+          return { mode: 'htmlmixed', icon: 'fa-brands fa-html5 text-orange-400', type: 'html' };
+        case 'css':
+          return { mode: 'css', icon: 'fa-brands fa-css3-alt text-blue-400', type: 'css' };
+        case 'js':
+          return { mode: 'javascript', icon: 'fa-brands fa-js text-yellow-400', type: 'js' };
+        case 'json':
+          return { mode: { name: 'javascript', json: true }, icon: 'fa-solid fa-brackets-curly text-green-400', type: 'json' };
+        case 'md':
+          return { mode: 'markdown', icon: 'fa-brands fa-markdown text-purple-400', type: 'md' };
+        default:
+          return { mode: 'text/plain', icon: 'fa-solid fa-file-lines text-term-muted', type: 'txt' };
+      }
+    }
 
-    tabButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetTab = btn.getAttribute('data-tab');
+    // --- 6. DÉMARRAGE DE SESSION (PROGRAMME DE BASE VS VIDE) ---
+    function startWorkspace(mode) {
+      initCodeMirror();
+      consoleOutput.innerHTML = '';
 
-        tabButtons.forEach(b => {
-          b.classList.remove('active', 'border-blue-500', 'text-blue-600', 'dark:text-blue-400', 'bg-white', 'dark:bg-gray-900');
-          b.classList.add('border-transparent', 'text-gray-500');
-        });
+      if (mode === 'default') {
+        // Copie profonde des fichiers par défaut
+        files = DEFAULT_PROJECT_FILES.map(f => ({ ...f }));
+        activeFileId = files[0].id;
+        appendConsoleLog('info', ['Session initialisée : PROGRAMME DE BASE chargé.']);
+      } else {
+        // Espace vide sans aucun fichier
+        files = [];
+        activeFileId = null;
+        appendConsoleLog('info', ['Session initialisée : PROGRAMME VIDE. Cliquez sur "+ NOUVEAU" pour créer un fichier.']);
+      }
 
-        btn.classList.add('active', 'border-blue-500', 'text-blue-600', 'dark:text-blue-400', 'bg-white', 'dark:bg-gray-900');
-        btn.classList.remove('border-transparent', 'text-gray-500');
+      bootScreen.classList.add('hidden');
+      ideWorkspace.classList.remove('hidden');
 
-        tabContents.forEach(content => content.classList.add('hidden'));
-        document.getElementById(`${targetTab}Editor`).classList.remove('hidden');
+      renderWorkspace();
+      updatePreview();
+    }
 
-        // Rafraîchir l'éditeur affiché pour corriger les bugs d'affichage de CodeMirror
-        if (editors[targetTab]) {
-          editors[targetTab].refresh();
-        }
+    document.getElementById('btnBootDefault').addEventListener('click', () => startWorkspace('default'));
+    document.getElementById('btnBootEmpty').addEventListener('click', () => startWorkspace('empty'));
+
+    // Retour à l'écran d'accueil
+    function returnToBootScreen() {
+      ideWorkspace.classList.add('hidden');
+      bootScreen.classList.remove('hidden');
+    }
+    document.getElementById('btnReturnBoot').addEventListener('click', returnToBootScreen);
+    document.getElementById('menuBtn').addEventListener('click', returnToBootScreen);
+
+    // --- 7. RENDU DE L'EXPLORATEUR, DES ONGLETS ET DE L'ÉDITEUR ---
+    function renderWorkspace() {
+      renderFileExplorer();
+      renderTabs();
+      renderActiveEditor();
+      fileCountLabel.textContent = `${files.length} fichier${files.length > 1 ? 's' : ''}`;
+    }
+
+    function renderFileExplorer() {
+      fileListEl.innerHTML = '';
+
+      if (files.length === 0) {
+        fileListEl.innerHTML = `
+          <div class="text-[11px] text-term-muted italic p-2 text-center">
+            // Répertoire vide
+          </div>
+        `;
+        return;
+      }
+
+      files.forEach(file => {
+        const isActive = file.id === activeFileId;
+        const meta = getFileMetadata(file.name);
+
+        const row = document.createElement('div');
+        row.className = `group flex items-center justify-between px-2 py-1.5 cursor-pointer border transition-colors ${
+          isActive 
+            ? 'border-term-accent bg-term-accent-dim text-term-accent font-bold' 
+            : 'border-transparent hover:border-term-dim text-term-text'
+        }`;
+
+        row.innerHTML = `
+          <div class="flex items-center space-x-2 truncate flex-1" onclick="selectFile('${file.id}')">
+            <i class="${meta.icon} text-xs"></i>
+            <span class="truncate">${file.name}</span>
+          </div>
+          <div class="flex items-center space-x-1 opacity-80 group-hover:opacity-100">
+            <button onclick="openRenameModal('${file.id}', event)" class="p-1 text-term-muted hover:text-term-accent" title="Renommer">
+              <i class="fa-solid fa-pen text-[10px]"></i>
+            </button>
+            <button onclick="deleteFile('${file.id}', event)" class="p-1 text-term-muted hover:text-red-400" title="Supprimer le fichier">
+              <i class="fa-solid fa-trash-can text-[10px]"></i>
+            </button>
+          </div>
+        `;
+
+        fileListEl.appendChild(row);
       });
+    }
+
+    function renderTabs() {
+      tabsBarEl.innerHTML = '';
+
+      files.forEach(file => {
+        const isActive = file.id === activeFileId;
+        const meta = getFileMetadata(file.name);
+
+        const tab = document.createElement('div');
+        tab.className = `flex items-center space-x-2 px-3 py-1.5 text-xs cursor-pointer border-t border-x shrink-0 transition-colors ${
+          isActive
+            ? 'bg-term-main border-term-accent text-term-accent font-bold'
+            : 'bg-term-panel border-transparent text-term-muted hover:text-term-text'
+        }`;
+
+        tab.innerHTML = `
+          <span onclick="selectFile('${file.id}')" class="flex items-center space-x-1.5">
+            <i class="${meta.icon} text-[11px]"></i>
+            <span>${file.name}</span>
+          </span>
+          <button onclick="deleteFile('${file.id}', event)" class="ml-1.5 hover:text-red-400 text-[10px]" title="Supprimer">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        `;
+
+        tabsBarEl.appendChild(tab);
+      });
+    }
+
+    function renderActiveEditor() {
+      if (files.length === 0 || !activeFileId) {
+        codeMirrorContainer.classList.add('hidden');
+        emptyEditorState.classList.remove('hidden');
+        return;
+      }
+
+      emptyEditorState.classList.add('hidden');
+      codeMirrorContainer.classList.remove('hidden');
+
+      const activeFile = files.find(f => f.id === activeFileId);
+      if (activeFile && cmInstance) {
+        const meta = getFileMetadata(activeFile.name);
+        isUpdatingEditor = true;
+        cmInstance.setOption('mode', meta.mode);
+        cmInstance.setValue(activeFile.content);
+        isUpdatingEditor = false;
+        setTimeout(() => cmInstance.refresh(), 10);
+      }
+    }
+
+    // --- 8. ACTIONS SUR LES FICHIERS (SÉLECTION, AJOUT, RENOMMAGE, SUPPRESSION) ---
+    window.selectFile = function(id) {
+      activeFileId = id;
+      renderWorkspace();
+    };
+
+    window.deleteFile = function(id, event) {
+      if (event) event.stopPropagation();
+      const fileIndex = files.findIndex(f => f.id === id);
+      if (fileIndex === -1) return;
+
+      const deletedName = files[fileIndex].name;
+      files.splice(fileIndex, 1);
+
+      if (activeFileId === id) {
+        if (files.length > 0) {
+          const nextIndex = Math.min(fileIndex, files.length - 1);
+          activeFileId = files[nextIndex].id;
+        } else {
+          activeFileId = null;
+        }
+      }
+
+      appendConsoleLog('warn', [`Fichier supprimé : ${deletedName}`]);
+      renderWorkspace();
+      updatePreview();
+    };
+
+    // Modale de création / renommage
+    function openCreateModal() {
+      modalMode = 'create';
+      targetRenameId = null;
+      modalTitle.textContent = '> NOUVEAU_FICHIER';
+      fileNameInput.value = '';
+      modalErrorMsg.classList.add('hidden');
+      fileModal.classList.remove('hidden');
+      setTimeout(() => fileNameInput.focus(), 50);
+    }
+
+    window.openRenameModal = function(id, event) {
+      if (event) event.stopPropagation();
+      const file = files.find(f => f.id === id);
+      if (!file) return;
+
+      modalMode = 'rename';
+      targetRenameId = id;
+      modalTitle.textContent = `> RENOMMER : ${file.name}`;
+      fileNameInput.value = file.name;
+      modalErrorMsg.classList.add('hidden');
+      fileModal.classList.remove('hidden');
+      setTimeout(() => fileNameInput.focus(), 50);
+    };
+
+    function closeFileModal() {
+      fileModal.classList.add('hidden');
+    }
+
+    document.getElementById('btnAddFile').addEventListener('click', openCreateModal);
+    document.getElementById('btnEmptyAddFile').addEventListener('click', openCreateModal);
+    document.getElementById('btnCloseModal').addEventListener('click', closeFileModal);
+    document.getElementById('btnCancelModal').addEventListener('click', closeFileModal);
+
+    // Modèle de contenu initial lors de la création d'un nouveau fichier
+    function getStarterTemplate(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (ext === 'html' || ext === 'htm') {
+        return `<!DOCTYPE html>\n<html lang="fr">\n<head>\n  <meta charset="UTF-8">\n  <title>${filename}</title>\n</head>\n<body>\n  <h1>${filename}</h1>\n</body>\n</html>`;
+      }
+      if (ext === 'css') {
+        return `/* Feuille de style : ${filename} */\nbody {\n  margin: 0;\n  padding: 1rem;\n  font-family: monospace;\n}\n`;
+      }
+      if (ext === 'js') {
+        return `// Script : ${filename}\nconsole.log("${filename} chargé !");\n`;
+      }
+      if (ext === 'json') {
+        return `{\n  "projet": "CforCodeEditor",\n  "fichier": "${filename}"\n}\n`;
+      }
+      return '';
+    }
+
+    fileModalForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const rawName = fileNameInput.value.trim();
+
+      if (!rawName) {
+        modalErrorMsg.textContent = 'Erreur : Veuillez saisir un nom de fichier.';
+        modalErrorMsg.classList.remove('hidden');
+        return;
+      }
+
+      // Vérifier les doublons
+      const duplicate = files.find(f => f.name.toLowerCase() === rawName.toLowerCase() && f.id !== targetRenameId);
+      if (duplicate) {
+        modalErrorMsg.textContent = `Erreur : Le fichier "${rawName}" existe déjà.`;
+        modalErrorMsg.classList.remove('hidden');
+        return;
+      }
+
+      if (modalMode === 'create') {
+        const newFile = {
+          id: 'file-' + Date.now(),
+          name: rawName,
+          content: getStarterTemplate(rawName)
+        };
+        files.push(newFile);
+        activeFileId = newFile.id;
+        appendConsoleLog('info', [`Fichier créé : ${rawName}`]);
+      } else if (modalMode === 'rename' && targetRenameId) {
+        const file = files.find(f => f.id === targetRenameId);
+        if (file) {
+          const oldName = file.name;
+          file.name = rawName;
+          appendConsoleLog('info', [`Fichier renommé : ${oldName} -> ${rawName}`]);
+        }
+      }
+
+      closeFileModal();
+      renderWorkspace();
+      updatePreview();
     });
 
-    // --- Rendu de l'aperçu et interception de la console ---
-    const previewIframe = document.getElementById('previewIframe');
-    const consoleOutput = document.getElementById('consoleOutput');
+    // --- 9. COMPILATION ET APERÇU EN DIRECT ---
+    let previewTimer = null;
+    function debouncePreview() {
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(updatePreview, 500);
+    }
 
     function updatePreview() {
-      const html = editors.html.getValue();
-      const css = editors.css.getValue();
-      const js = editors.js.getValue();
+      // Chercher le fichier HTML principal (index.html ou le premier .html, ou le fichier actif s'il est .html)
+      const activeFile = files.find(f => f.id === activeFileId);
+      let htmlFile = (activeFile && activeFile.name.toLowerCase().endsWith('.html'))
+        ? activeFile
+        : files.find(f => f.name.toLowerCase() === 'index.html') || files.find(f => f.name.toLowerCase().endsWith('.html'));
 
-      // Script d'injection pour capturer la console et les erreurs
-      const consoleOverrideScript = `
+      const cssFiles = files.filter(f => f.name.toLowerCase().endsWith('.css'));
+      const jsFiles = files.filter(f => f.name.toLowerCase().endsWith('.js'));
+
+      if (!htmlFile && cssFiles.length === 0 && jsFiles.length === 0) {
+        previewFileBadge.textContent = '[AUCUN RENDU HTML]';
+        previewIframe.srcdoc = `
+          <html>
+            <body style="background:#070907;color:#5a7a61;font-family:monospace;display:flex;align-items:center;justify-content:center;height:90vh;margin:0;text-align:center;">
+              <div>
+                <div style="font-size:1.2rem;margin-bottom:0.5rem;">&gt;_ STDOUT EN ATTENTE</div>
+                <div style="font-size:0.8rem;">Créez un fichier index.html pour afficher l'aperçu web.</div>
+              </div>
+            </body>
+          </html>
+        `;
+        return;
+      }
+
+      previewFileBadge.textContent = htmlFile ? `[${htmlFile.name}]` : '[AUTO-HTML]';
+
+      const combinedCSS = cssFiles.map(f => `/* ${f.name} */\n${f.content}`).join('\n\n');
+      const combinedJS = jsFiles.map(f => `// ${f.name}\n${f.content}`).join('\n\n');
+      const baseHTML = htmlFile ? htmlFile.content : '<body></body>';
+
+      const consoleHookScript = `
         <script>
           (function() {
-            const originalLog = console.log;
-            const originalError = console.error;
-            const originalWarn = console.warn;
-            const originalInfo = console.info;
+            const origLog = console.log;
+            const origWarn = console.warn;
+            const origError = console.error;
+            const origInfo = console.info;
 
-            function sendToHost(type, args) {
+            function relay(level, args) {
               window.parent.postMessage({
-                type: 'CONSOLE_LOG',
-                logType: type,
-                data: Array.from(args).map(arg => {
+                source: 'CFORCODE_IFRAME',
+                level: level,
+                payload: Array.from(args).map(item => {
                   try {
-                    return typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg);
-                  } catch(e) {
-                    return String(arg);
+                    return typeof item === 'object' ? JSON.stringify(item, null, 2) : String(item);
+                  } catch (e) {
+                    return String(item);
                   }
                 })
               }, '*');
             }
 
-            console.log = function(...args) { sendToHost('log', args); originalLog.apply(console, args); };
-            console.error = function(...args) { sendToHost('error', args); originalError.apply(console, args); };
-            console.warn = function(...args) { sendToHost('warn', args); originalWarn.apply(console, args); };
-            console.info = function(...args) { sendToHost('info', args); originalInfo.apply(console, args); };
+            console.log = function(...a) { relay('log', a); origLog.apply(console, a); };
+            console.warn = function(...a) { relay('warn', a); origWarn.apply(console, a); };
+            console.error = function(...a) { relay('error', a); origError.apply(console, a); };
+            console.info = function(...a) { relay('info', a); origInfo.apply(console, a); };
 
-            window.onerror = function(msg, url, line) {
-              sendToHost('error', ["Erreur: " + msg + " (Ligne " + line + ")"]);
+            window.onerror = function(msg, src, line) {
+              relay('error', ['Uncaught Error: ' + msg + ' (ligne ' + line + ')']);
               return false;
             };
           })();
         <\/script>
       `;
 
-      const combinedSource = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <style>${css}</style>
-            ${consoleOverrideScript}
-          </head>
-          <body>
-            ${html}
-            <script>${js}<\/script>
-          </body>
-        </html>
-      `;
+      // Assemblage propre du document final
+      let finalDoc = baseHTML;
+      if (finalDoc.includes('</head>')) {
+        finalDoc = finalDoc.replace('</head>', `<style>${combinedCSS}</style>${consoleHookScript}</head>`);
+      } else {
+        finalDoc = `<head><style>${combinedCSS}</style>${consoleHookScript}</head>` + finalDoc;
+      }
 
-      previewIframe.srcdoc = combinedSource;
+      if (finalDoc.includes('</body>')) {
+        finalDoc = finalDoc.replace('</body>', `<script>${combinedJS}<\/script></body>`);
+      } else {
+        finalDoc = finalDoc + `<script>${combinedJS}<\/script>`;
+      }
+
+      previewIframe.srcdoc = finalDoc;
     }
 
-    // Gestion de l'anti-rebond (Debounce) pour l'exécution automatique
-    let debounceTimer;
-    function debounceUpdate() {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(updatePreview, 600);
-    }
+    document.getElementById('runBtn').addEventListener('click', updatePreview);
+    document.getElementById('refreshPreview').addEventListener('click', updatePreview);
 
-    // Réception des messages de la console iframe
+    // --- 10. CONSOLE INTERACTIVE ---
     window.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'CONSOLE_LOG') {
-        appendConsoleLog(event.data.logType, event.data.data);
+      if (event.data && event.data.source === 'CFORCODE_IFRAME') {
+        appendConsoleLog(event.data.level, event.data.payload);
       }
     });
 
-    function appendConsoleLog(type, logs) {
-      const logRow = document.createElement('div');
-      logRow.className = 'flex items-start space-x-2 font-mono text-xs border-b border-gray-800/50 pb-1';
+    function appendConsoleLog(level, messages) {
+      const line = document.createElement('div');
+      line.className = 'flex items-start space-x-2 border-b border-term-dim/40 pb-1 font-mono';
 
-      let colorClass = 'text-gray-300';
-      let icon = 'fa-angle-right';
+      let prefix = '>';
+      let colorClass = 'text-term-text';
 
-      if (type === 'error') {
-        colorClass = 'text-red-400 bg-red-950/30 p-1 rounded';
-        icon = 'fa-circle-xmark';
-      } else if (type === 'warn') {
-        colorClass = 'text-amber-400 bg-amber-950/30 p-1 rounded';
-        icon = 'fa-triangle-exclamation';
-      } else if (type === 'info') {
-        colorClass = 'text-blue-400';
-        icon = 'fa-circle-info';
+      if (level === 'error') {
+        prefix = '[ERR]';
+        colorClass = 'text-red-400';
+      } else if (level === 'warn') {
+        prefix = '[WRN]';
+        colorClass = 'text-amber-400';
+      } else if (level === 'info') {
+        prefix = '[SYS]';
+        colorClass = 'text-term-accent';
       }
 
-      logRow.innerHTML = `
-        <i class="fa-solid ${icon} mt-0.5 text-[10px] ${colorClass}"></i>
-        <div class="flex-1 whitespace-pre-wrap ${colorClass}">${logs.join(' ')}</div>
+      line.innerHTML = `
+        <span class="${colorClass} font-bold shrink-0">${prefix}</span>
+        <span class="${colorClass} whitespace-pre-wrap break-all">${escapeHtml(messages.join(' '))}</span>
       `;
 
-      consoleOutput.appendChild(logRow);
+      consoleOutput.appendChild(line);
       consoleOutput.scrollTop = consoleOutput.scrollHeight;
     }
 
-    // --- Action Buttons ---
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
 
-    // Bouton Lancer
-    document.getElementById('runBtn').addEventListener('click', () => {
-      updatePreview();
-    });
-
-    // Rafraîchir manuellement
-    document.getElementById('refreshPreview').addEventListener('click', () => {
-      updatePreview();
-    });
-
-    // Vider la console
     document.getElementById('clearConsoleBtn').addEventListener('click', () => {
       consoleOutput.innerHTML = '';
     });
 
-    // Bouton Effacer le code
-    document.getElementById('clearBtn').addEventListener('click', () => {
-      const activeTab = document.querySelector('.tab-btn.active').getAttribute('data-tab');
-      editors[activeTab].setValue('');
-      editors[activeTab].focus();
+    // Exécution directe de commandes dans la console
+    consoleInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const cmd = consoleInput.value.trim();
+        if (!cmd) return;
+        appendConsoleLog('log', [`$ ${cmd}`]);
+        consoleInput.value = '';
+
+        try {
+          const result = previewIframe.contentWindow.eval(cmd);
+          if (result !== undefined) {
+            appendConsoleLog('info', [typeof result === 'object' ? JSON.stringify(result) : String(result)]);
+          }
+        } catch (err) {
+          appendConsoleLog('error', [err.message]);
+        }
+      }
     });
 
-    // Bouton Télécharger le fichier ZIP/HTML assemblé
+    // --- 11. EXPORT / TÉLÉCHARGEMENT DU PROJET ---
     document.getElementById('downloadBtn').addEventListener('click', () => {
-      const html = editors.html.getValue();
-      const css = editors.css.getValue();
-      const js = editors.js.getValue();
+      if (files.length === 0) {
+        appendConsoleLog('error', ['Impossible d\'exporter : aucun fichier dans le projet.']);
+        return;
+      }
 
-      const fullCode = `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projet Exporté</title>
-  <style>
-${css}
-  </style>
-</head>
-<body>
-${html}
-  <script>
-${js}
-  <\/script>
-</body>
-</html>`;
+      const htmlFile = files.find(f => f.name.toLowerCase() === 'index.html') || files.find(f => f.name.toLowerCase().endsWith('.html'));
+      const cssFiles = files.filter(f => f.name.toLowerCase().endsWith('.css'));
+      const jsFiles = files.filter(f => f.name.toLowerCase().endsWith('.js'));
 
-      const blob = new Blob([fullCode], { type: 'text/html' });
+      let exportContent = '';
+      let exportFilename = 'cforcode-project.html';
+
+      if (htmlFile || cssFiles.length > 0 || jsFiles.length > 0) {
+        const cssBlock = cssFiles.map(f => f.content).join('\n');
+        const jsBlock = jsFiles.map(f => f.content).join('\n');
+        const bodyBlock = htmlFile ? htmlFile.content : '<h1>Projet CforCodeEditor</h1>';
+
+        exportContent = `<!DOCTYPE html>\n<html lang="fr">\n<head>\n<meta charset="UTF-8">\n<title>Projet CforCodeEditor</title>\n<style>\n${cssBlock}\n</style>\n</head>\n<body>\n${bodyBlock}\n<script>\n${jsBlock}\n<\/script>\n</body>\n</html>`;
+      } else {
+        // Export du fichier actif brut s'il n'y a pas de code web
+        const active = files.find(f => f.id === activeFileId) || files[0];
+        exportContent = active.content;
+        exportFilename = active.name;
+      }
+
+      const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'index.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = exportFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       URL.revokeObjectURL(url);
+
+      appendConsoleLog('info', [`Projet exporté sous "${exportFilename}".`]);
     });
 
-    // --- Gestion du Thème (Clair / Sombre) ---
-    const themeToggleBtn = document.getElementById('themeToggle');
-
-    themeToggleBtn.addEventListener('click', () => {
-      const isDark = document.documentElement.classList.toggle('dark');
-      const newTheme = isDark ? 'dracula' : 'neo';
-
-      Object.keys(editors).forEach(key => {
-        editors[key].setOption('theme', newTheme);
-      });
-    });
-
-    // --- Resizing / Split View Implementation ---
+    // --- 12. REDIMENSIONNEMENT DES PANNEAUX (SPLITTERS) ---
     const resizerH = document.getElementById('resizerH');
     const editorPanel = document.getElementById('editorPanel');
     const previewPanel = document.getElementById('previewPanel');
     const mainContainer = document.getElementById('mainContainer');
+    const fileExplorer = document.getElementById('fileExplorer');
 
-    let isDraggingH = false;
-
-    resizerH.addEventListener('mousedown', (e) => {
-      isDraggingH = true;
-      resizerH.classList.add('dragging');
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    });
-
-    // Redimensionnement Vertical (Console)
     const resizerV = document.getElementById('resizerV');
     const iframeContainer = document.getElementById('iframeContainer');
     const consoleContainer = document.getElementById('consoleContainer');
 
+    let isDraggingH = false;
     let isDraggingV = false;
 
-    resizerV.addEventListener('mousedown', (e) => {
+    resizerH.addEventListener('mousedown', () => {
+      isDraggingH = true;
+      resizerH.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+    });
+
+    resizerV.addEventListener('mousedown', () => {
       isDraggingV = true;
       resizerV.classList.add('dragging');
       document.body.style.cursor = 'row-resize';
-      document.body.style.userSelect = 'none';
     });
 
     document.addEventListener('mousemove', (e) => {
       if (isDraggingH) {
-        const containerWidth = mainContainer.clientWidth;
-        const pointerX = e.clientX;
-        const leftPercent = (pointerX / containerWidth) * 100;
+        const containerRect = mainContainer.getBoundingClientRect();
+        const sidebarWidth = fileExplorer.offsetWidth;
+        const availableWidth = containerRect.width - sidebarWidth;
+        const editorWidth = e.clientX - containerRect.left - sidebarWidth;
+        const percent = (editorWidth / availableWidth) * 100;
 
-        if (leftPercent > 15 && leftPercent < 85) {
-          editorPanel.style.width = `${leftPercent}%`;
-          previewPanel.style.width = `${100 - leftPercent}%`;
+        if (percent > 20 && percent < 80) {
+          editorPanel.style.flex = 'none';
+          editorPanel.style.width = `${editorWidth}px`;
+          previewPanel.style.flex = '1';
         }
       }
 
       if (isDraggingV) {
         const previewRect = previewPanel.getBoundingClientRect();
-        const pointerY = e.clientY - previewRect.top;
-        const totalHeight = previewRect.height;
-        const topPercent = (pointerY / totalHeight) * 100;
+        const topHeight = e.clientY - previewRect.top;
+        const topPercent = (topHeight / previewRect.height) * 100;
 
         if (topPercent > 20 && topPercent < 80) {
           iframeContainer.style.height = `${topPercent}%`;
@@ -597,18 +1280,9 @@ ${js}
         resizerH.classList.remove('dragging');
         resizerV.classList.remove('dragging');
         document.body.style.cursor = 'default';
-        document.body.style.userSelect = 'auto';
-
-        // Rafraîchir les instances de CodeMirror après redimensionnement
-        Object.keys(editors).forEach(key => editors[key].refresh());
+        if (cmInstance) cmInstance.refresh();
       }
     });
-
-    // --- Initialisation au chargement ---
-    window.onload = function() {
-      initEditors();
-      updatePreview();
-    };
   </script>
 </body>
 </html>
