@@ -354,10 +354,17 @@
             <i class="fa-solid fa-folder-tree"></i>
             <span>FICHIERS</span>
           </span>
-          <button id="btnAddFile" class="term-btn px-2 py-0.5 text-[11px] font-bold flex items-center space-x-1 cursor-pointer" title="Ajouter un nouveau fichier">
-            <i class="fa-solid fa-plus"></i>
-            <span>NOUVEAU</span>
-          </button>
+          <div class="flex items-center space-x-1">
+            <button id="btnImportFile" class="term-btn px-1.5 py-0.5 text-[11px] font-bold flex items-center space-x-1 cursor-pointer" title="Importer un ou plusieurs fichiers depuis votre ordinateur">
+              <i class="fa-solid fa-file-import"></i>
+              <span class="hidden sm:inline">IMPORTER</span>
+            </button>
+            <button id="btnAddFile" class="term-btn px-1.5 py-0.5 text-[11px] font-bold flex items-center space-x-1 cursor-pointer" title="Ajouter un nouveau fichier">
+              <i class="fa-solid fa-plus"></i>
+              <span>NOUVEAU</span>
+            </button>
+          </div>
+          <input type="file" id="hiddenFileInput" multiple class="hidden" accept=".html,.htm,.css,.js,.json,.md,.txt,.xml,.svg,.csv,*/*">
         </div>
 
         <!-- Liste dynamique des fichiers -->
@@ -395,12 +402,18 @@
             </div>
             <h2 class="text-sm font-bold text-term-accent mb-2">AUCUN FICHIER DANS L'ESPACE DE TRAVAIL</h2>
             <p class="text-xs text-term-muted mb-5 leading-relaxed">
-              Le répertoire courant est vide. Créez un fichier (<span class="text-term-text">index.html</span>, <span class="text-term-text">style.css</span>, <span class="text-term-text">app.js</span>...) pour commencer à coder.
+              Le répertoire courant est vide. Créez un fichier (<span class="text-term-text">index.html</span>, <span class="text-term-text">style.css</span>, <span class="text-term-text">app.js</span>...) ou glissez-déposez vos fichiers locaux ici.
             </p>
-            <button id="btnEmptyAddFile" class="term-btn-solid px-4 py-2 text-xs cursor-pointer inline-flex items-center space-x-2">
-              <i class="fa-solid fa-plus"></i>
-              <span>+ CRÉER UN FICHIER</span>
-            </button>
+            <div class="flex flex-wrap justify-center gap-2">
+              <button id="btnEmptyAddFile" class="term-btn-solid px-4 py-2 text-xs cursor-pointer inline-flex items-center space-x-2">
+                <i class="fa-solid fa-plus"></i>
+                <span>+ CRÉER UN FICHIER</span>
+              </button>
+              <button id="btnEmptyImportFile" class="term-btn px-4 py-2 text-xs cursor-pointer inline-flex items-center space-x-2">
+                <i class="fa-solid fa-file-import"></i>
+                <span>IMPORTER</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -966,6 +979,81 @@ if (btnInc && btnReset) {
     document.getElementById('btnEmptyAddFile').addEventListener('click', openCreateModal);
     document.getElementById('btnCloseModal').addEventListener('click', closeFileModal);
     document.getElementById('btnCancelModal').addEventListener('click', closeFileModal);
+
+    // --- IMPORTATION DE FICHIERS LOCAUX (BOUTON + GLISSER-DÉPOSER) ---
+    const hiddenFileInput = document.getElementById('hiddenFileInput');
+    const btnImportFile = document.getElementById('btnImportFile');
+    const btnEmptyImportFile = document.getElementById('btnEmptyImportFile');
+
+    function triggerFileImport() {
+      hiddenFileInput.value = '';
+      hiddenFileInput.click();
+    }
+
+    btnImportFile.addEventListener('click', triggerFileImport);
+    btnEmptyImportFile.addEventListener('click', triggerFileImport);
+
+    function handleImportedFileList(fileList) {
+      if (!fileList || fileList.length === 0) return;
+
+      Array.from(fileList).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const content = event.target.result;
+          const existing = files.find(f => f.name.toLowerCase() === file.name.toLowerCase());
+
+          if (existing) {
+            existing.content = content;
+            activeFileId = existing.id;
+            appendConsoleLog('info', [`Fichier mis à jour via import : ${file.name}`]);
+          } else {
+            const newFile = {
+              id: 'file-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+              name: file.name,
+              content: content
+            };
+            files.push(newFile);
+            activeFileId = newFile.id;
+            appendConsoleLog('info', [`Fichier importé : ${file.name}`]);
+          }
+
+          renderWorkspace();
+          updatePreview();
+        };
+        reader.onerror = function() {
+          appendConsoleLog('error', [`Erreur lors de la lecture du fichier : ${file.name}`]);
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    hiddenFileInput.addEventListener('change', (e) => {
+      handleImportedFileList(e.target.files);
+    });
+
+    // Support du Glisser-Déposer (Drag & Drop) sur l'explorateur et l'éditeur
+    [fileExplorer, editorPanel].forEach(dropZone => {
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('ring-1', 'ring-inset', 'ring-current');
+      });
+
+      dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('ring-1', 'ring-inset', 'ring-current');
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('ring-1', 'ring-inset', 'ring-current');
+        if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+          handleImportedFileList(e.dataTransfer.files);
+        }
+      });
+    });
 
     // Modèle de contenu initial lors de la création d'un nouveau fichier
     function getStarterTemplate(filename) {
