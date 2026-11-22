@@ -1,539 +1,912 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CforCodeEditor // Terminal IDE</title>
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png">
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts: Fira Code & JetBrains Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- CodeMirror CSS & Modes -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/darcula.min.css">
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closetag.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CforCodeEditor — Terminal IDE</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png" />
+
+  <!-- Polices Monospace -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Prism.js pour la coloration syntaxique -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
 
   <style>
     :root {
-      --term-bg: #070907;
-      --term-panel: #0c100c;
-      --term-header: #111711;
-      --term-accent: #00ff41;
-      --term-accent-dim: rgba(0, 255, 65, 0.15);
-      --term-accent-glow: rgba(0, 255, 65, 0.4);
-      --term-text: #d4f7dc;
-      --term-muted: #5a7a61;
+      --bg-main: #121614;
+      --bg-panel: #181d1a;
+      --bg-elevated: #202723;
+      --border: #2c3831;
+      --accent: #4ade80;
+      --accent-soft: rgba(74, 222, 128, 0.14);
+      --text-main: #e2ebe5;
+      --text-dim: #8a9e91;
+      --danger: #f87171;
+      --warn: #fbbf24;
+      --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
-    /* Variantes de thèmes Terminal */
-    body.theme-amber {
-      --term-bg: #0a0804;
-      --term-panel: #120e07;
-      --term-header: #1a140a;
-      --term-accent: #ffb000;
-      --term-accent-dim: rgba(255, 176, 0, 0.15);
-      --term-accent-glow: rgba(255, 176, 0, 0.4);
-      --term-text: #fae8c8;
-      --term-muted: #8a6d3b;
+    [data-theme="amber"] {
+      --bg-main: #171412;
+      --bg-panel: #1f1b18;
+      --bg-elevated: #29231f;
+      --border: #3d332c;
+      --accent: #fbbf24;
+      --accent-soft: rgba(251, 191, 36, 0.14);
+      --text-main: #f3ece4;
+      --text-dim: #a8998c;
     }
 
-    body.theme-cyan {
-      --term-bg: #050a0c;
-      --term-panel: #091216;
-      --term-header: #0e1c22;
-      --term-accent: #00f0ff;
-      --term-accent-dim: rgba(0, 240, 255, 0.15);
-      --term-accent-glow: rgba(0, 240, 255, 0.4);
-      --term-text: #d6f9fc;
-      --term-muted: #4b7d85;
+    [data-theme="cyan"] {
+      --bg-main: #12161b;
+      --bg-panel: #181e26;
+      --bg-elevated: #212934;
+      --border: #2f3b4a;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.14);
+      --text-main: #e5eff8;
+      --text-dim: #8da1b5;
     }
 
     * {
       box-sizing: border-box;
-      font-family: 'Fira Code', monospace;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      background-color: var(--term-bg);
-      color: var(--term-text);
-      margin: 0;
+      font-family: var(--font-mono);
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* Écran d'accueil (Boot Screen) */
+    #boot-screen {
+      position: fixed;
+      inset: 0;
+      background-color: var(--bg-main);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    #boot-screen.hidden {
+      display: none;
+    }
+
+    .boot-box {
+      width: 100%;
+      max-width: 640px;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 32px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .boot-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .boot-logo {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: var(--bg-elevated);
+      padding: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .boot-title h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    .boot-title p {
+      color: var(--text-dim);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .boot-prompt {
+      color: var(--text-main);
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+
+    .boot-prompt span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .boot-choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 560px) {
+      .boot-choices {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .choice-card {
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 18px;
+      text-align: left;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: border-color 0.15s, background-color 0.15s, transform 0.1s;
+    }
+
+    .choice-card:hover {
+      border-color: var(--accent);
+      background-color: var(--accent-soft);
+      transform: translateY(-2px);
+    }
+
+    .choice-key {
+      display: inline-block;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .choice-name {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .choice-desc {
+      display: block;
+      font-size: 11.5px;
+      color: var(--text-dim);
+      line-height: 1.45;
+    }
+
+    /* En-tête principal */
+    header {
+      height: 46px;
+      background-color: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .brand img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .brand-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .brand-path {
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      background-color: var(--bg-elevated);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-accent {
+      background-color: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .btn-accent:hover {
+      background-color: var(--accent);
+      color: var(--bg-main);
+    }
+
+    .theme-dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 6px;
+      padding: 4px 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+
+    .theme-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .theme-dot:hover,
+    .theme-dot.active {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+
+    /* Espace de travail principal */
+    .workspace {
+      display: flex;
+      flex: 1;
       overflow: hidden;
     }
 
-    /* Effet subtil de scanlines CRT */
-    .crt-overlay {
-      background: linear-gradient(
-        rgba(18, 16, 16, 0) 50%, 
-        rgba(0, 0, 0, 0.18) 50%
-      );
-      background-size: 100% 4px;
+    /* Barre latérale explorateur */
+    .sidebar {
+      width: 235px;
+      background-color: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: background-color 0.15s, border-color 0.15s;
+    }
+
+    .sidebar.drag-over {
+      background-color: var(--accent-soft);
+      border-right: 2px dashed var(--accent);
+    }
+
+    .sidebar-header {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .icon-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .file-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 9px;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+      border: 1px solid transparent;
+    }
+
+    .file-item:hover {
+      background-color: var(--bg-elevated);
+      color: var(--text-main);
+    }
+
+    .file-item.active {
+      background-color: var(--accent-soft);
+      border-color: var(--border);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-badge {
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    .file-item.active .file-badge {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .file-controls {
+      display: none;
+      gap: 4px;
+    }
+
+    .file-item:hover .file-controls {
+      display: flex;
+    }
+
+    .file-ctrl-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 0 3px;
+    }
+
+    .file-ctrl-btn:hover {
+      color: var(--accent);
+    }
+
+    .file-ctrl-btn.del:hover {
+      color: var(--danger);
+    }
+
+    .drop-hint {
+      padding: 10px;
+      margin: 8px;
+      border: 1px dashed var(--border);
+      border-radius: 4px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* Zone Éditeur + Aperçu */
+    .main-area {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .editor-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      min-width: 0;
+      position: relative;
+    }
+
+    .editor-pane.drag-over::after {
+      content: "Déposez vos fichiers ici pour les importer";
+      position: absolute;
+      inset: 10px;
+      background: var(--bg-panel);
+      border: 2px dashed var(--accent);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-weight: 600;
+      z-index: 20;
+      opacity: 0.95;
+    }
+
+    .tabs-bar {
+      height: 35px;
+      background-color: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      overflow-x: auto;
+      padding: 0 6px;
+      gap: 4px;
+    }
+
+    .tab {
+      padding: 5px 10px;
+      font-size: 12px;
+      color: var(--text-dim);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .tab:hover {
+      color: var(--text-main);
+      background: var(--bg-elevated);
+    }
+
+    .tab.active {
+      color: var(--accent);
+      background: var(--bg-main);
+      border-color: var(--border);
+    }
+
+    .editor-container {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+      background-color: var(--bg-main);
+    }
+
+    .line-numbers {
+      width: 46px;
+      padding: 14px 8px 14px 0;
+      text-align: right;
+      color: var(--text-dim);
+      background-color: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      user-select: none;
+      overflow: hidden;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .code-wrapper {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #code-highlight,
+    #code-input {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.55;
+      tab-size: 2;
+      white-space: pre;
+      overflow: auto;
+      border: none;
+      outline: none;
+    }
+
+    #code-highlight {
       pointer-events: none;
+      background: transparent !important;
+      z-index: 1;
     }
 
-    /* Classes utilitaires liées aux variables CSS */
-    .bg-term-main { background-color: var(--term-bg); }
-    .bg-term-panel { background-color: var(--term-panel); }
-    .bg-term-header { background-color: var(--term-header); }
-    .bg-term-accent-dim { background-color: var(--term-accent-dim); }
-    .text-term-accent { color: var(--term-accent); }
-    .text-term-muted { color: var(--term-muted); }
-    .border-term-accent { border-color: var(--term-accent); }
-    .border-term-dim { border-color: var(--term-accent-dim); }
-
-    .term-btn {
-      border: 1px solid var(--term-accent);
-      color: var(--term-accent);
-      background-color: transparent;
-      transition: all 0.15s ease;
-    }
-    .term-btn:hover {
-      background-color: var(--term-accent);
-      color: var(--term-bg);
-      box-shadow: 0 0 10px var(--term-accent-glow);
+    #code-highlight code {
+      font-family: var(--font-mono) !important;
+      background: transparent !important;
+      padding: 0 !important;
+      text-shadow: none !important;
     }
 
-    .term-btn-solid {
-      border: 1px solid var(--term-accent);
-      background-color: var(--term-accent);
-      color: var(--term-bg);
-      font-weight: 700;
-      transition: all 0.15s ease;
-    }
-    .term-btn-solid:hover {
-      filter: brightness(1.15);
-      box-shadow: 0 0 12px var(--term-accent-glow);
+    #code-input {
+      z-index: 2;
+      background: transparent;
+      color: transparent;
+      caret-color: var(--accent);
+      resize: none;
     }
 
-    /* Curseur clignotant */
-    @keyframes blink {
-      0%, 49% { opacity: 1; }
-      50%, 100% { opacity: 0; }
-    }
-    .cursor-blink {
-      animation: blink 1s infinite;
+    #code-input::selection {
+      background: var(--accent-soft);
     }
 
-    /* Personnalisation CodeMirror pour coller au thème Terminal */
-    .CodeMirror {
-      height: 100% !important;
-      background-color: var(--term-bg) !important;
-      color: var(--term-text) !important;
-      font-family: 'Fira Code', monospace !important;
-      font-size: 13.5px;
-      line-height: 1.5;
-    }
-    .CodeMirror-gutters {
-      background-color: var(--term-panel) !important;
-      border-right: 1px solid var(--term-accent-dim) !important;
-    }
-    .CodeMirror-linenumber {
-      color: var(--term-muted) !important;
-    }
-    .CodeMirror-cursor {
-      border-left: 2px solid var(--term-accent) !important;
-    }
-    .CodeMirror-activeline-background {
-      background: var(--term-accent-dim) !important;
-    }
-    .CodeMirror-selected {
-      background: var(--term-accent-dim) !important;
+    /* État vide (sans fichier) */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      color: var(--text-dim);
+      gap: 14px;
     }
 
-    /* Splitters */
-    .resizer-h {
-      cursor: col-resize;
-      width: 5px;
-      background-color: var(--term-accent-dim);
-      transition: background-color 0.2s;
-    }
-    .resizer-h:hover, .resizer-h.dragging {
-      background-color: var(--term-accent);
-    }
-    .resizer-v {
-      cursor: row-resize;
-      height: 5px;
-      background-color: var(--term-accent-dim);
-      transition: background-color 0.2s;
-    }
-    .resizer-v:hover, .resizer-v.dragging {
-      background-color: var(--term-accent);
+    .empty-state.hidden {
+      display: none;
     }
 
-    /* Scrollbars custom terminal */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    .empty-state h3 {
+      color: var(--text-main);
+      font-size: 15px;
     }
-    ::-webkit-scrollbar-track {
-      background: var(--term-bg);
+
+    .empty-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    ::-webkit-scrollbar-thumb {
-      background: var(--term-accent-dim);
-      border: 1px solid var(--term-accent);
+
+    /* Panneau droit : Aperçu + Console */
+    .preview-pane {
+      width: 45%;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-panel);
+      min-width: 280px;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--term-accent);
+
+    .preview-header {
+      height: 35px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 11.5px;
+      color: var(--text-dim);
+    }
+
+    .preview-frame-wrap {
+      flex: 1;
+      background: #ffffff;
+      position: relative;
+    }
+
+    iframe#preview-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Console intégrée */
+    .console-panel {
+      height: 165px;
+      border-top: 1px solid var(--border);
+      background-color: var(--bg-main);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .console-header {
+      height: 28px;
+      padding: 0 10px;
+      background-color: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .console-logs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .log-info { color: var(--text-main); }
+    .log-warn { color: var(--warn); }
+    .log-error { color: var(--danger); }
+    .log-sys { color: var(--accent); }
+
+    /* Barre de statut */
+    footer {
+      height: 25px;
+      background-color: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    /* Modale personnalisée */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .modal-card h4 {
+      color: var(--accent);
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .modal-input {
+      width: 100%;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      margin-bottom: 14px;
+      outline: none;
+    }
+
+    .modal-input:focus {
+      border-color: var(--accent);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
     }
   </style>
 </head>
-<body class="h-screen flex flex-col select-none">
+<body>
 
-  <!-- Overlay effet CRT subtil -->
-  <div class="fixed inset-0 crt-overlay z-50"></div>
+  <!-- Input fichier caché pour l'importation -->
+  <input type="file" id="file-import-input" multiple style="display:none" />
 
-  <!-- ========================================================= -->
-  <!-- 1. ÉCRAN D'ACCUEIL / BOOT SCREEN (STYLE TERMINAL)         -->
-  <!-- ========================================================= -->
-  <div id="bootScreen" class="fixed inset-0 z-40 bg-term-main flex items-center justify-center p-4 overflow-y-auto">
-    <div class="w-full max-w-2xl border border-term-accent bg-term-panel p-6 sm:p-8 shadow-2xl relative">
-      
-      <!-- Barre supérieure de fenêtre terminal -->
-      <div class="flex items-center justify-between border-b border-term-dim pb-3 mb-6 text-xs text-term-muted">
-        <div class="flex items-center space-x-2">
-          <span class="inline-block w-2.5 h-2.5 bg-term-accent"></span>
-          <span>root@cforcode:~/boot_sequence</span>
-        </div>
-        <span>SYS_READY // v2.4</span>
-      </div>
-
-      <!-- Logo & Titre -->
-      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-6">
-        <div class="w-20 h-20 border border-term-accent p-1.5 bg-term-main flex items-center justify-center shrink-0">
-          <img 
-            src="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png" 
-            alt="Logo CforCodeEditor" 
-            class="w-full h-full object-contain"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-          >
-          <div class="hidden w-full h-full items-center justify-center text-term-accent text-2xl font-bold">
-            &lt;/&gt;
-          </div>
-        </div>
-        <div class="text-center sm:text-left">
-          <h1 class="text-2xl sm:text-3xl font-bold text-term-accent tracking-wider">
-            CforCodeEditor<span class="cursor-blink">_</span>
-          </h1>
-          <p class="text-xs sm:text-sm text-term-muted mt-1">
-            Environnement de développement web interactif en ligne de commande.
-          </p>
+  <!-- Écran d'accueil -->
+  <div id="boot-screen">
+    <div class="boot-box">
+      <div class="boot-header">
+        <img
+          src="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png"
+          alt="CforCodeEditor Logo"
+          class="boot-logo"
+        />
+        <div class="boot-title">
+          <h1>CforCodeEditor</h1>
+          <p>Environnement de développement web en terminal</p>
         </div>
       </div>
 
-      <!-- Prompt de sélection -->
-      <div class="border-t border-term-dim pt-5">
-        <p class="text-xs sm:text-sm mb-4">
-          <span class="text-term-accent font-bold">user@cforcode:~$</span> Sélectionnez un mode d'initialisation de l'espace de travail :
-        </p>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Option 1 : Programme de base -->
-          <button id="btnBootDefault" class="text-left border border-term-accent bg-term-main hover:bg-term-accent-dim p-4 transition-all group cursor-pointer focus:outline-none">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-term-accent font-bold text-sm group-hover:underline">[1] PROGRAMME DE BASE</span>
-              <i class="fa-solid fa-folder-open text-term-accent text-xs"></i>
-            </div>
-            <p class="text-xs text-term-muted leading-relaxed">
-              Charge l'environnement avec les fichiers d'exemple (<span class="text-term-text">index.html</span>, <span class="text-term-text">style.css</span>, <span class="text-term-text">script.js</span>) prêts à être exécutés et modifiés.
-            </p>
-          </button>
-
-          <!-- Option 2 : Programme vide -->
-          <button id="btnBootEmpty" class="text-left border border-term-accent bg-term-main hover:bg-term-accent-dim p-4 transition-all group cursor-pointer focus:outline-none">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-term-accent font-bold text-sm group-hover:underline">[2] PROGRAMME VIDE</span>
-              <i class="fa-solid fa-terminal text-term-accent text-xs"></i>
-            </div>
-            <p class="text-xs text-term-muted leading-relaxed">
-              Démarre une session vierge sans aucun fichier ouvert. Créez votre architecture à partir de zéro (<span class="text-term-text">+ Nouveau fichier</span>).
-            </p>
-          </button>
-        </div>
+      <div class="boot-prompt">
+        <span>root@cforcode:~$</span> Sélectionnez un mode de démarrage :
       </div>
 
-      <!-- Sélecteur de couleur terminal sur l'accueil -->
-      <div class="mt-6 pt-4 border-t border-term-dim flex items-center justify-between text-xs text-term-muted">
-        <span>Phosphore écran :</span>
-        <div class="flex items-center space-x-2">
-          <button onclick="setTerminalTheme('matrix')" class="px-2 py-0.5 border border-[#00ff41] text-[#00ff41] hover:bg-[#00ff41] hover:text-black text-[11px]">VERT</button>
-          <button onclick="setTerminalTheme('amber')" class="px-2 py-0.5 border border-[#ffb000] text-[#ffb000] hover:bg-[#ffb000] hover:text-black text-[11px]">AMBRE</button>
-          <button onclick="setTerminalTheme('cyan')" class="px-2 py-0.5 border border-[#00f0ff] text-[#00f0ff] hover:bg-[#00f0ff] hover:text-black text-[11px]">CYAN</button>
-        </div>
+      <div class="boot-choices">
+        <button class="choice-card" id="btn-start-demo">
+          <span class="choice-key">[1] PROGRAMME DE BASE</span>
+          <span class="choice-name">Charger le projet d'exemple</span>
+          <span class="choice-desc">Ouvre l'éditeur avec index.html, style.css et script.js préconfigurés.</span>
+        </button>
+
+        <button class="choice-card" id="btn-start-empty">
+          <span class="choice-key">[2] PROGRAMME VIDE</span>
+          <span class="choice-name">Démarrer sans fichier</span>
+          <span class="choice-desc">Ouvre un espace vierge pour créer ou importer vos propres fichiers.</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- 2. INTERFACE PRINCIPALE DE L'ÉDITEUR (IDE TERMINAL)       -->
-  <!-- ========================================================= -->
-  <div id="ideWorkspace" class="hidden flex-1 flex flex-col h-full overflow-hidden">
+  <!-- En-tête -->
+  <header>
+    <div class="brand" id="btn-home" title="Retourner au menu de démarrage">
+      <img
+        src="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png"
+        alt="Logo"
+      />
+      <span class="brand-name">CforCodeEditor</span>
+      <span class="brand-path" id="header-active-file">~/workspace</span>
+    </div>
 
-    <!-- Barre d'en-tête -->
-    <header class="h-12 bg-term-header border-b border-term-accent px-3 flex items-center justify-between shrink-0">
-      
-      <!-- Logo & Identité -->
-      <div class="flex items-center space-x-3">
-        <button id="btnReturnBoot" class="flex items-center space-x-2.5 hover:opacity-80 transition-opacity text-left" title="Retourner à l'écran d'accueil">
-          <img 
-            src="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png" 
-            alt="Logo" 
-            class="w-7 h-7 object-contain border border-term-accent p-0.5 bg-term-main"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"
-          >
-          <span class="hidden text-term-accent font-bold border border-term-accent px-1.5 py-0.5 text-xs">&lt;/&gt;</span>
-          <div>
-            <span class="font-bold text-term-accent text-sm sm:text-base tracking-wide">CforCodeEditor</span>
-          </div>
-        </button>
-        <span class="hidden lg:inline-block text-xs text-term-muted border-l border-term-dim pl-3">
-          user@cforcode:~/workspace$
-        </span>
+    <div class="toolbar">
+      <div class="theme-dots" title="Changer le thème du terminal">
+        <button class="theme-dot active" data-set-theme="green" style="background:#4ade80" title="Vert Terminal"></button>
+        <button class="theme-dot" data-set-theme="amber" style="background:#fbbf24" title="Ambre Doux"></button>
+        <button class="theme-dot" data-set-theme="cyan" style="background:#38bdf8" title="Cyan Ardoise"></button>
       </div>
 
-      <!-- Barre d'outils / Actions -->
-      <div class="flex items-center space-x-1.5 sm:space-x-2">
-        
-        <!-- Auto-Run -->
-        <label class="hidden sm:flex items-center space-x-1.5 cursor-pointer text-xs text-term-muted hover:text-term-text mr-1 border border-term-dim px-2 py-1">
-          <input type="checkbox" id="autoRunToggle" checked class="accent-current">
-          <span>AUTO_RUN</span>
-        </label>
+      <button class="btn" id="btn-mode">MODE</button>
+      <button class="btn" id="btn-download">EXPORTER HTML</button>
+      <button class="btn btn-accent" id="btn-run">▶ EXÉCUTER</button>
+    </div>
+  </header>
 
-        <!-- Bouton Exécuter -->
-        <button id="runBtn" class="term-btn-solid px-2.5 sm:px-3 py-1 text-xs flex items-center space-x-1.5 cursor-pointer" title="Exécuter le projet (Ctrl+S)">
-          <i class="fa-solid fa-play text-[10px]"></i>
-          <span>RUN</span>
-        </button>
-
-        <!-- Bouton Télécharger / Export -->
-        <button id="downloadBtn" class="term-btn px-2.5 py-1 text-xs flex items-center space-x-1.5 cursor-pointer" title="Exporter le projet compilé en HTML">
-          <i class="fa-solid fa-download text-[10px]"></i>
-          <span class="hidden md:inline">EXPORT</span>
-        </button>
-
-        <!-- Bouton Menu Accueil -->
-        <button id="menuBtn" class="term-btn px-2.5 py-1 text-xs flex items-center space-x-1.5 cursor-pointer" title="Changer de mode (Base / Vide)">
-          <i class="fa-solid fa-power-off text-[10px]"></i>
-          <span class="hidden md:inline">MODE</span>
-        </button>
-
-        <!-- Sélecteur rapide de couleur Terminal -->
-        <button id="cycleThemeBtn" class="term-btn px-2 py-1 text-xs cursor-pointer" title="Changer la couleur du terminal (Vert / Ambre / Cyan)">
-          <i class="fa-solid fa-palette"></i>
-        </button>
+  <!-- Espace de travail -->
+  <div class="workspace">
+    <!-- Explorateur de fichiers -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span>FICHIERS</span>
+        <div class="sidebar-actions">
+          <button class="icon-btn" id="btn-new-file" title="Créer un nouveau fichier">+ FICHIER</button>
+          <button class="icon-btn" id="btn-import-file" title="Importer depuis votre ordinateur">IMPORTER</button>
+        </div>
       </div>
-    </header>
 
-    <!-- Corps de l'IDE -->
-    <main id="mainContainer" class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+      <div class="file-list" id="file-list"></div>
 
-      <!-- ===================================== -->
-      <!-- EXPLORATEUR DE FICHIERS (SIDEBAR)     -->
-      <!-- ===================================== -->
-      <aside id="fileExplorer" class="w-full md:w-56 bg-term-panel border-b md:border-b-0 md:border-r border-term-dim flex flex-col shrink-0 max-h-40 md:max-h-none">
-        
-        <!-- En-tête explorateur -->
-        <div class="h-9 px-3 bg-term-header border-b border-term-dim flex items-center justify-between text-xs">
-          <span class="font-bold text-term-accent tracking-wider flex items-center space-x-1.5">
-            <i class="fa-solid fa-folder-tree"></i>
-            <span>FICHIERS</span>
-          </span>
-          <div class="flex items-center space-x-1">
-            <button id="btnImportFile" class="term-btn px-1.5 py-0.5 text-[11px] font-bold flex items-center space-x-1 cursor-pointer" title="Importer un ou plusieurs fichiers depuis votre ordinateur">
-              <i class="fa-solid fa-file-import"></i>
-              <span class="hidden sm:inline">IMPORTER</span>
-            </button>
-            <button id="btnAddFile" class="term-btn px-1.5 py-0.5 text-[11px] font-bold flex items-center space-x-1 cursor-pointer" title="Ajouter un nouveau fichier">
-              <i class="fa-solid fa-plus"></i>
-              <span>NOUVEAU</span>
-            </button>
-          </div>
-          <input type="file" id="hiddenFileInput" multiple class="hidden" accept=".html,.htm,.css,.js,.json,.md,.txt,.xml,.svg,.csv,*/*">
-        </div>
+      <div class="drop-hint">
+        Glissez-déposez vos fichiers ici
+      </div>
+    </aside>
 
-        <!-- Liste dynamique des fichiers -->
-        <div id="fileList" class="flex-1 overflow-y-auto p-1.5 space-y-1 text-xs">
-          <!-- Généré dynamiquement par JS -->
-        </div>
+    <!-- Zone principale -->
+    <main class="main-area">
+      <!-- Éditeur -->
+      <section class="editor-pane" id="editor-pane">
+        <div class="tabs-bar" id="tabs-bar"></div>
 
-        <!-- Pied de sidebar : infos -->
-        <div class="hidden md:flex h-7 px-3 border-t border-term-dim items-center justify-between text-[10px] text-term-muted">
-          <span id="fileCountLabel">0 fichier(s)</span>
-          <span>UTF-8</span>
-        </div>
-      </aside>
-
-      <!-- ===================================== -->
-      <!-- ZONE D'ÉDITION DE CODE                -->
-      <!-- ===================================== -->
-      <section id="editorPanel" class="w-full md:w-1/2 flex-1 flex flex-col bg-term-main overflow-hidden min-h-[200px]">
-        
-        <!-- Barre des onglets ouverts -->
-        <div id="tabsBar" class="h-9 bg-term-header border-b border-term-dim flex items-center overflow-x-auto px-1 space-x-1 shrink-0">
-          <!-- Onglets générés dynamiquement -->
-        </div>
-
-        <!-- Conteneur CodeMirror -->
-        <div id="codeMirrorContainer" class="flex-1 relative overflow-hidden">
-          <textarea id="codeTextarea"></textarea>
-        </div>
-
-        <!-- État vide (affiché lorsqu'aucun fichier n'existe ou n'est sélectionné) -->
-        <div id="emptyEditorState" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center bg-term-main">
-          <div class="border border-term-dim bg-term-panel p-6 max-w-md">
-            <div class="text-term-accent text-3xl mb-3">
-              <i class="fa-solid fa-terminal"></i>
-            </div>
-            <h2 class="text-sm font-bold text-term-accent mb-2">AUCUN FICHIER DANS L'ESPACE DE TRAVAIL</h2>
-            <p class="text-xs text-term-muted mb-5 leading-relaxed">
-              Le répertoire courant est vide. Créez un fichier (<span class="text-term-text">index.html</span>, <span class="text-term-text">style.css</span>, <span class="text-term-text">app.js</span>...) ou glissez-déposez vos fichiers locaux ici.
-            </p>
-            <div class="flex flex-wrap justify-center gap-2">
-              <button id="btnEmptyAddFile" class="term-btn-solid px-4 py-2 text-xs cursor-pointer inline-flex items-center space-x-2">
-                <i class="fa-solid fa-plus"></i>
-                <span>+ CRÉER UN FICHIER</span>
-              </button>
-              <button id="btnEmptyImportFile" class="term-btn px-4 py-2 text-xs cursor-pointer inline-flex items-center space-x-2">
-                <i class="fa-solid fa-file-import"></i>
-                <span>IMPORTER</span>
-              </button>
-            </div>
+        <!-- Vue vide quand aucun fichier n'est présent -->
+        <div class="empty-state hidden" id="empty-state">
+          <h3>Aucun fichier ouvert dans l'espace de travail</h3>
+          <p>Créez un nouveau fichier ou importez des fichiers existants depuis votre ordinateur.</p>
+          <div class="empty-actions">
+            <button class="btn btn-accent" id="btn-empty-new">+ NOUVEAU FICHIER</button>
+            <button class="btn" id="btn-empty-import">IMPORTER DES FICHIERS</button>
           </div>
         </div>
 
+        <!-- Éditeur de code -->
+        <div class="editor-container" id="editor-container">
+          <div class="line-numbers" id="line-numbers">1</div>
+          <div class="code-wrapper">
+            <pre id="code-highlight" aria-hidden="true"><code id="code-highlight-content" class="language-html"></code></pre>
+            <textarea id="code-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+          </div>
+        </div>
       </section>
 
-      <!-- Séparateur horizontal redimensionnable -->
-      <div id="resizerH" class="resizer-h hidden md:block z-20"></div>
-
-      <!-- ===================================== -->
-      <!-- APERÇU EN DIRECT & CONSOLE            -->
-      <!-- ===================================== -->
-      <section id="previewPanel" class="w-full md:w-2/5 flex flex-col h-1/2 md:h-full bg-term-main border-t md:border-t-0 border-term-dim overflow-hidden">
-        
-        <!-- Zone Iframe Aperçu -->
-        <div id="iframeContainer" class="flex-1 flex flex-col h-2/3 min-h-[120px]">
-          <div class="h-9 bg-term-header px-3 flex items-center justify-between text-xs border-b border-term-dim shrink-0">
-            <span class="flex items-center space-x-2 text-term-accent font-semibold">
-              <i class="fa-solid fa-display"></i>
-              <span>STDOUT // APERÇU</span>
-            </span>
-            <div class="flex items-center space-x-2">
-              <span id="previewFileBadge" class="text-[10px] text-term-muted"></span>
-              <button id="refreshPreview" class="text-term-muted hover:text-term-accent transition-colors cursor-pointer" title="Rafraîchir le rendu">
-                <i class="fa-solid fa-rotate-right"></i>
-              </button>
-            </div>
-          </div>
-          <iframe id="previewIframe" class="w-full flex-1 bg-white border-0" sandbox="allow-scripts allow-modals"></iframe>
+      <!-- Aperçu et console -->
+      <section class="preview-pane">
+        <div class="preview-header">
+          <span>APERÇU EN DIRECT</span>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="auto-run" checked />
+            Auto-refresh
+          </label>
         </div>
 
-        <!-- Séparateur vertical redimensionnable -->
-        <div id="resizerV" class="resizer-v z-20"></div>
-
-        <!-- Zone Console Interactive -->
-        <div id="consoleContainer" class="h-1/3 min-h-[110px] flex flex-col bg-term-bg border-t border-term-dim">
-          <div class="h-8 bg-term-header px-3 flex items-center justify-between text-xs border-b border-term-dim shrink-0">
-            <span class="flex items-center space-x-2 text-term-accent font-bold">
-              <i class="fa-solid fa-terminal"></i>
-              <span>CONSOLE_LOG</span>
-            </span>
-            <button id="clearConsoleBtn" class="text-[11px] text-term-muted hover:text-term-accent transition-colors cursor-pointer">
-              [CLEAR]
-            </button>
-          </div>
-
-          <!-- Logs -->
-          <div id="consoleOutput" class="flex-1 p-2.5 text-xs overflow-y-auto space-y-1 select-text"></div>
-
-          <!-- Prompt d'exécution JS direct dans la console -->
-          <div class="h-8 border-t border-term-dim bg-term-panel px-2 flex items-center space-x-2 shrink-0">
-            <span class="text-term-accent text-xs font-bold">&gt;</span>
-            <input 
-              type="text" 
-              id="consoleInput" 
-              placeholder="Exécuter une commande JS..." 
-              class="flex-1 bg-transparent text-xs text-term-text focus:outline-none placeholder-term-muted"
-              autocomplete="off"
-            >
-          </div>
+        <div class="preview-frame-wrap">
+          <iframe id="preview-frame" sandbox="allow-scripts allow-modals"></iframe>
         </div>
 
+        <div class="console-panel">
+          <div class="console-header">
+            <span>CONSOLE TERMINAL</span>
+            <button class="icon-btn" id="btn-clear-console">EFFACER</button>
+          </div>
+          <div class="console-logs" id="console-logs"></div>
+        </div>
       </section>
-
     </main>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- 3. MODALE STYLE TERMINAL (CRÉATION / RENOMMAGE FICHIER)   -->
-  <!-- ========================================================= -->
-  <div id="fileModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-    <div class="w-full max-w-md border border-term-accent bg-term-panel p-5 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-term-dim pb-2.5 mb-4">
-        <span id="modalTitle" class="text-xs font-bold text-term-accent tracking-wider">
-          &gt; NOUVEAU_FICHIER
-        </span>
-        <button id="btnCloseModal" class="text-term-muted hover:text-term-accent text-sm cursor-pointer">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+  <!-- Barre d'état -->
+  <footer>
+    <span id="status-msg">Prêt.</span>
+    <span id="cursor-pos">Ln 1, Col 1</span>
+  </footer>
+
+  <!-- Modale création / renommage -->
+  <div class="modal-backdrop" id="file-modal">
+    <div class="modal-card">
+      <h4 id="modal-title">Nouveau fichier</h4>
+      <input type="text" id="modal-filename" class="modal-input" placeholder="exemple: app.js" />
+      <div class="modal-actions">
+        <button class="btn" id="btn-modal-cancel">Annuler</button>
+        <button class="btn btn-accent" id="btn-modal-confirm">Valider</button>
       </div>
-
-      <form id="fileModalForm" class="space-y-4">
-        <div>
-          <label for="fileNameInput" class="block text-xs text-term-muted mb-1.5">
-            Nom du fichier avec extension (ex: <span class="text-term-text">app.js</span>, <span class="text-term-text">page.html</span>, <span class="text-term-text">theme.css</span>) :
-          </label>
-          <div class="flex items-center border border-term-accent bg-term-main px-2.5 py-2">
-            <span class="text-term-accent text-xs mr-2">$ touch</span>
-            <input 
-              type="text" 
-              id="fileNameInput" 
-              class="flex-1 bg-transparent text-xs text-term-text focus:outline-none" 
-              placeholder="nouveau_fichier.js"
-              required
-              autocomplete="off"
-            >
-          </div>
-          <p id="modalErrorMsg" class="hidden text-[11px] text-red-400 mt-1.5"></p>
-        </div>
-
-        <div class="flex justify-end space-x-2 pt-2">
-          <button type="button" id="btnCancelModal" class="term-btn px-3 py-1.5 text-xs cursor-pointer">
-            ANNULER
-          </button>
-          <button type="submit" class="term-btn-solid px-4 py-1.5 text-xs cursor-pointer">
-            VALIDER
-          </button>
-        </div>
-      </form>
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- JAVASCRIPT DE L'APPLICATION                               -->
-  <!-- ========================================================= -->
   <script>
-    // --- 1. FICHIERS PAR DÉFAUT ("PROGRAMME DE BASE") ---
-    const DEFAULT_PROJECT_FILES = [
+    // Fichiers du programme de base
+    const DEFAULT_FILES = [
       {
-        id: 'file-1',
-        name: 'index.html',
+        name: "index.html",
         content: `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -541,835 +914,537 @@
   <title>Démo CforCodeEditor</title>
 </head>
 <body>
-  <div class="terminal-card">
-    <div class="badge">SYSTEM // ONLINE</div>
-    <h1>&gt;_ CforCodeEditor</h1>
-    <p>Bienvenue dans votre espace de développement interactif style Terminal !</p>
-    
-    <div class="counter-panel">
-      <div class="label">COMPTEUR D'IMPULSIONS :</div>
-      <div id="count" class="value">0</div>
-      <div class="actions">
-        <button id="btnInc">[ + INCRÉMENTER ]</button>
-        <button id="btnReset" class="secondary">[ RESET ]</button>
-      </div>
-    </div>
+  <div class="card">
+    <h1>Bienvenue sur CforCodeEditor</h1>
+    <p>Modifiez le code HTML, CSS ou JS pour voir le résultat en direct.</p>
+    <button id="click-btn">Tester le script</button>
+    <p id="counter">Clics : 0</p>
   </div>
 </body>
 </html>`
       },
       {
-        id: 'file-2',
-        name: 'style.css',
+        name: "style.css",
         content: `body {
-  font-family: 'Courier New', Courier, monospace;
-  background-color: #070907;
-  color: #00ff41;
+  font-family: system-ui, sans-serif;
+  background: #f0f4f8;
+  color: #1e293b;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   margin: 0;
-  padding: 1rem;
 }
 
-.terminal-card {
-  background: #0d120d;
-  border: 1px solid #00ff41;
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
+.card {
+  background: white;
   padding: 2rem;
-  max-width: 420px;
-  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   text-align: center;
-}
-
-.badge {
-  display: inline-block;
-  font-size: 0.7rem;
-  border: 1px solid #00ff41;
-  padding: 0.2rem 0.6rem;
-  margin-bottom: 1rem;
-  letter-spacing: 2px;
-}
-
-h1 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.6rem;
-  text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
-}
-
-p {
-  color: #8ab894;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.counter-panel {
-  margin-top: 1.5rem;
-  padding: 1.2rem;
-  border: 1px dashed #00ff41;
-  background: rgba(0, 255, 65, 0.04);
-}
-
-.label {
-  font-size: 0.75rem;
-  color: #8ab894;
-}
-
-.value {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin: 0.5rem 0;
-}
-
-.actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 1rem;
+  max-width: 400px;
 }
 
 button {
-  background: #00ff41;
-  color: #070907;
-  border: 1px solid #00ff41;
-  padding: 0.5rem 0.9rem;
-  font-family: inherit;
-  font-weight: bold;
-  font-size: 0.8rem;
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.15s;
+  margin-top: 10px;
 }
 
 button:hover {
-  box-shadow: 0 0 12px rgba(0, 255, 65, 0.6);
-}
-
-button.secondary {
-  background: transparent;
-  color: #00ff41;
-}
-
-button.secondary:hover {
-  background: rgba(0, 255, 65, 0.15);
+  background: #15803d;
 }`
       },
       {
-        id: 'file-3',
-        name: 'script.js',
-        content: `// Script interactif CforCodeEditor
-let count = 0;
+        name: "script.js",
+        content: `let count = 0;
+const btn = document.getElementById('click-btn');
+const counter = document.getElementById('counter');
 
-const countDisplay = document.getElementById('count');
-const btnInc = document.getElementById('btnInc');
-const btnReset = document.getElementById('btnReset');
-
-console.log("[SYSTEM] Programme de base chargé avec succès.");
-
-if (btnInc && btnReset) {
-  btnInc.addEventListener('click', () => {
-    count++;
-    countDisplay.textContent = count;
-    console.log("Impulsion enregistrée -> Valeur :", count);
-  });
-
-  btnReset.addEventListener('click', () => {
-    count = 0;
-    countDisplay.textContent = count;
-    console.warn("Compteur remis à zéro.");
-  });
-}`
+btn.addEventListener('click', () => {
+  count++;
+  counter.textContent = 'Clics : ' + count;
+  console.log('Bouton cliqué (' + count + ')');
+});`
       }
     ];
 
-    // --- 2. ÉTAT GLOBAL DE L'APPLICATION ---
+    // État de l'application
     let files = [];
-    let activeFileId = null;
-    let cmInstance = null;
-    let isUpdatingEditor = false;
-    let modalMode = 'create'; // 'create' ou 'rename'
-    let targetRenameId = null;
+    let activeFileName = null;
+    let modalMode = "create"; // "create" ou "rename"
+    let targetRenameFile = null;
+    let runTimeout = null;
 
-    // --- 3. RÉFÉRENCES DOM ---
-    const bootScreen = document.getElementById('bootScreen');
-    const ideWorkspace = document.getElementById('ideWorkspace');
-    const fileListEl = document.getElementById('fileList');
-    const tabsBarEl = document.getElementById('tabsBar');
-    const fileCountLabel = document.getElementById('fileCountLabel');
-    const codeMirrorContainer = document.getElementById('codeMirrorContainer');
-    const emptyEditorState = document.getElementById('emptyEditorState');
-    const previewIframe = document.getElementById('previewIframe');
-    const previewFileBadge = document.getElementById('previewFileBadge');
-    const consoleOutput = document.getElementById('consoleOutput');
-    const consoleInput = document.getElementById('consoleInput');
+    // Éléments DOM
+    const bootScreen = document.getElementById("boot-screen");
+    const fileListEl = document.getElementById("file-list");
+    const tabsBarEl = document.getElementById("tabs-bar");
+    const emptyStateEl = document.getElementById("empty-state");
+    const editorContainerEl = document.getElementById("editor-container");
+    const codeInput = document.getElementById("code-input");
+    const codeHighlight = document.getElementById("code-highlight");
+    const codeHighlightContent = document.getElementById("code-highlight-content");
+    const lineNumbersEl = document.getElementById("line-numbers");
+    const previewFrame = document.getElementById("preview-frame");
+    const consoleLogsEl = document.getElementById("console-logs");
+    const headerActiveFile = document.getElementById("header-active-file");
+    const statusMsg = document.getElementById("status-msg");
+    const cursorPos = document.getElementById("cursor-pos");
+    const fileImportInput = document.getElementById("file-import-input");
 
     // Modale
-    const fileModal = document.getElementById('fileModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const fileModalForm = document.getElementById('fileModalForm');
-    const fileNameInput = document.getElementById('fileNameInput');
-    const modalErrorMsg = document.getElementById('modalErrorMsg');
+    const fileModal = document.getElementById("file-modal");
+    const modalTitle = document.getElementById("modal-title");
+    const modalFilename = document.getElementById("modal-filename");
 
-    // --- 4. GESTION DU THÈME TERMINAL ---
-    const themes = ['matrix', 'amber', 'cyan'];
-    let currentThemeIndex = 0;
+    // Utilitaires
+    function getLangFromFilename(filename) {
+      const ext = filename.split(".").pop().toLowerCase();
+      const map = {
+        html: "html",
+        htm: "html",
+        css: "css",
+        js: "javascript",
+        json: "json",
+        md: "markdown"
+      };
+      return map[ext] || "markup";
+    }
 
-    function setTerminalTheme(themeName) {
-      document.body.classList.remove('theme-amber', 'theme-cyan');
-      if (themeName === 'amber') {
-        document.body.classList.add('theme-amber');
-        currentThemeIndex = 1;
-      } else if (themeName === 'cyan') {
-        document.body.classList.add('theme-cyan');
-        currentThemeIndex = 2;
+    function getExtBadge(filename) {
+      const parts = filename.split(".");
+      return parts.length > 1 ? parts.pop().toUpperCase() : "TXT";
+    }
+
+    function logToConsole(message, type = "info") {
+      const div = document.createElement("div");
+      div.className = `log-entry log-${type}`;
+      const time = new Date().toLocaleTimeString("fr-FR", { hour12: false });
+      div.textContent = `[${time}] ${message}`;
+      consoleLogsEl.appendChild(div);
+      consoleLogsEl.scrollTop = consoleLogsEl.scrollHeight;
+    }
+
+    function setStatus(text) {
+      statusMsg.textContent = text;
+    }
+
+    // Initialisation du mode
+    function startEditor(mode) {
+      if (mode === "demo") {
+        files = DEFAULT_FILES.map(f => ({ ...f }));
+        activeFileName = files[0].name;
+        logToConsole("Programme de base chargé.", "sys");
       } else {
-        currentThemeIndex = 0;
-      }
-      if (cmInstance) cmInstance.refresh();
-    }
-
-    document.getElementById('cycleThemeBtn').addEventListener('click', () => {
-      currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-      setTerminalTheme(themes[currentThemeIndex]);
-    });
-
-    // --- 5. INITIALISATION DE CODEMIRROR ---
-    function initCodeMirror() {
-      if (cmInstance) return;
-      cmInstance = CodeMirror.fromTextArea(document.getElementById('codeTextarea'), {
-        mode: 'htmlmixed',
-        theme: 'darcula',
-        lineNumbers: true,
-        autoCloseTags: true,
-        autoCloseBrackets: true,
-        styleActiveLine: true,
-        tabSize: 2,
-        indentUnit: 2,
-        lineWrapping: true,
-        extraKeys: {
-          'Ctrl-S': function() { updatePreview(); },
-          'Cmd-S': function() { updatePreview(); }
-        }
-      });
-
-      cmInstance.on('change', () => {
-        if (isUpdatingEditor || !activeFileId) return;
-        const currentFile = files.find(f => f.id === activeFileId);
-        if (currentFile) {
-          currentFile.content = cmInstance.getValue();
-          if (document.getElementById('autoRunToggle').checked) {
-            debouncePreview();
-          }
-        }
-      });
-    }
-
-    // Détecter le mode CodeMirror et l'icône selon l'extension du fichier
-    function getFileMetadata(filename) {
-      const ext = filename.split('.').pop().toLowerCase();
-      switch (ext) {
-        case 'html':
-        case 'htm':
-          return { mode: 'htmlmixed', icon: 'fa-brands fa-html5 text-orange-400', type: 'html' };
-        case 'css':
-          return { mode: 'css', icon: 'fa-brands fa-css3-alt text-blue-400', type: 'css' };
-        case 'js':
-          return { mode: 'javascript', icon: 'fa-brands fa-js text-yellow-400', type: 'js' };
-        case 'json':
-          return { mode: { name: 'javascript', json: true }, icon: 'fa-solid fa-brackets-curly text-green-400', type: 'json' };
-        case 'md':
-          return { mode: 'markdown', icon: 'fa-brands fa-markdown text-purple-400', type: 'md' };
-        default:
-          return { mode: 'text/plain', icon: 'fa-solid fa-file-lines text-term-muted', type: 'txt' };
-      }
-    }
-
-    // --- 6. DÉMARRAGE DE SESSION (PROGRAMME DE BASE VS VIDE) ---
-    function startWorkspace(mode) {
-      initCodeMirror();
-      consoleOutput.innerHTML = '';
-
-      if (mode === 'default') {
-        // Copie profonde des fichiers par défaut
-        files = DEFAULT_PROJECT_FILES.map(f => ({ ...f }));
-        activeFileId = files[0].id;
-        appendConsoleLog('info', ['Session initialisée : PROGRAMME DE BASE chargé.']);
-      } else {
-        // Espace vide sans aucun fichier
         files = [];
-        activeFileId = null;
-        appendConsoleLog('info', ['Session initialisée : PROGRAMME VIDE. Cliquez sur "+ NOUVEAU" pour créer un fichier.']);
+        activeFileName = null;
+        logToConsole("Espace de travail vide initialisé.", "sys");
       }
-
-      bootScreen.classList.add('hidden');
-      ideWorkspace.classList.remove('hidden');
-
-      renderWorkspace();
-      updatePreview();
+      bootScreen.classList.add("hidden");
+      renderAll();
+      runPreview();
     }
 
-    document.getElementById('btnBootDefault').addEventListener('click', () => startWorkspace('default'));
-    document.getElementById('btnBootEmpty').addEventListener('click', () => startWorkspace('empty'));
-
-    // Retour à l'écran d'accueil
-    function returnToBootScreen() {
-      ideWorkspace.classList.add('hidden');
-      bootScreen.classList.remove('hidden');
-    }
-    document.getElementById('btnReturnBoot').addEventListener('click', returnToBootScreen);
-    document.getElementById('menuBtn').addEventListener('click', returnToBootScreen);
-
-    // --- 7. RENDU DE L'EXPLORATEUR, DES ONGLETS ET DE L'ÉDITEUR ---
-    function renderWorkspace() {
-      renderFileExplorer();
+    // Rendu complet de l'interface
+    function renderAll() {
+      renderFileList();
       renderTabs();
-      renderActiveEditor();
-      fileCountLabel.textContent = `${files.length} fichier${files.length > 1 ? 's' : ''}`;
+      renderEditor();
     }
 
-    function renderFileExplorer() {
-      fileListEl.innerHTML = '';
-
-      if (files.length === 0) {
-        fileListEl.innerHTML = `
-          <div class="text-[11px] text-term-muted italic p-2 text-center">
-            // Répertoire vide
-          </div>
-        `;
-        return;
-      }
-
+    function renderFileList() {
+      fileListEl.innerHTML = "";
       files.forEach(file => {
-        const isActive = file.id === activeFileId;
-        const meta = getFileMetadata(file.name);
+        const item = document.createElement("div");
+        item.className = "file-item" + (file.name === activeFileName ? " active" : "");
 
-        const row = document.createElement('div');
-        row.className = `group flex items-center justify-between px-2 py-1.5 cursor-pointer border transition-colors ${
-          isActive 
-            ? 'border-term-accent bg-term-accent-dim text-term-accent font-bold' 
-            : 'border-transparent hover:border-term-dim text-term-text'
-        }`;
+        const info = document.createElement("div");
+        info.className = "file-info";
+        info.innerHTML = `<span class="file-badge">${getExtBadge(file.name)}</span><span>${file.name}</span>`;
+        info.onclick = () => selectFile(file.name);
 
-        row.innerHTML = `
-          <div class="flex items-center space-x-2 truncate flex-1" onclick="selectFile('${file.id}')">
-            <i class="${meta.icon} text-xs"></i>
-            <span class="truncate">${file.name}</span>
-          </div>
-          <div class="flex items-center space-x-1 opacity-80 group-hover:opacity-100">
-            <button onclick="openRenameModal('${file.id}', event)" class="p-1 text-term-muted hover:text-term-accent" title="Renommer">
-              <i class="fa-solid fa-pen text-[10px]"></i>
-            </button>
-            <button onclick="deleteFile('${file.id}', event)" class="p-1 text-term-muted hover:text-red-400" title="Supprimer le fichier">
-              <i class="fa-solid fa-trash-can text-[10px]"></i>
-            </button>
-          </div>
-        `;
+        const controls = document.createElement("div");
+        controls.className = "file-controls";
 
-        fileListEl.appendChild(row);
+        const renameBtn = document.createElement("button");
+        renameBtn.className = "file-ctrl-btn";
+        renameBtn.title = "Renommer";
+        renameBtn.textContent = "✎";
+        renameBtn.onclick = (e) => {
+          e.stopPropagation();
+          openRenameModal(file.name);
+        };
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "file-ctrl-btn del";
+        delBtn.title = "Supprimer";
+        delBtn.textContent = "✕";
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteFile(file.name);
+        };
+
+        controls.appendChild(renameBtn);
+        controls.appendChild(delBtn);
+
+        item.appendChild(info);
+        item.appendChild(controls);
+        fileListEl.appendChild(item);
       });
     }
 
     function renderTabs() {
-      tabsBarEl.innerHTML = '';
-
+      tabsBarEl.innerHTML = "";
       files.forEach(file => {
-        const isActive = file.id === activeFileId;
-        const meta = getFileMetadata(file.name);
-
-        const tab = document.createElement('div');
-        tab.className = `flex items-center space-x-2 px-3 py-1.5 text-xs cursor-pointer border-t border-x shrink-0 transition-colors ${
-          isActive
-            ? 'bg-term-main border-term-accent text-term-accent font-bold'
-            : 'bg-term-panel border-transparent text-term-muted hover:text-term-text'
-        }`;
-
-        tab.innerHTML = `
-          <span onclick="selectFile('${file.id}')" class="flex items-center space-x-1.5">
-            <i class="${meta.icon} text-[11px]"></i>
-            <span>${file.name}</span>
-          </span>
-          <button onclick="deleteFile('${file.id}', event)" class="ml-1.5 hover:text-red-400 text-[10px]" title="Supprimer">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        `;
-
+        const tab = document.createElement("div");
+        tab.className = "tab" + (file.name === activeFileName ? " active" : "");
+        tab.innerHTML = `<span>${file.name}</span>`;
+        tab.onclick = () => selectFile(file.name);
         tabsBarEl.appendChild(tab);
       });
     }
 
-    function renderActiveEditor() {
-      if (files.length === 0 || !activeFileId) {
-        codeMirrorContainer.classList.add('hidden');
-        emptyEditorState.classList.remove('hidden');
+    function renderEditor() {
+      const current = files.find(f => f.name === activeFileName);
+
+      if (!current) {
+        emptyStateEl.classList.remove("hidden");
+        editorContainerEl.style.display = "none";
+        headerActiveFile.textContent = "~/workspace (aucun fichier)";
         return;
       }
 
-      emptyEditorState.classList.add('hidden');
-      codeMirrorContainer.classList.remove('hidden');
+      emptyStateEl.classList.add("hidden");
+      editorContainerEl.style.display = "flex";
+      headerActiveFile.textContent = `~/workspace/${current.name}`;
 
-      const activeFile = files.find(f => f.id === activeFileId);
-      if (activeFile && cmInstance) {
-        const meta = getFileMetadata(activeFile.name);
-        isUpdatingEditor = true;
-        cmInstance.setOption('mode', meta.mode);
-        cmInstance.setValue(activeFile.content);
-        isUpdatingEditor = false;
-        setTimeout(() => cmInstance.refresh(), 10);
+      codeInput.value = current.content;
+      updateHighlighting();
+      updateLineNumbers();
+    }
+
+    function selectFile(name) {
+      activeFileName = name;
+      renderAll();
+    }
+
+    function deleteFile(name) {
+      files = files.filter(f => f.name !== name);
+      if (activeFileName === name) {
+        activeFileName = files.length > 0 ? files[0].name : null;
       }
+      logToConsole(`Fichier supprimé : ${name}`, "warn");
+      renderAll();
+      runPreview();
     }
 
-    // --- 8. ACTIONS SUR LES FICHIERS (SÉLECTION, AJOUT, RENOMMAGE, SUPPRESSION) ---
-    window.selectFile = function(id) {
-      activeFileId = id;
-      renderWorkspace();
-    };
+    // Coloration syntaxique & numéros de ligne
+    function updateHighlighting() {
+      const current = files.find(f => f.name === activeFileName);
+      if (!current) return;
 
-    window.deleteFile = function(id, event) {
-      if (event) event.stopPropagation();
-      const fileIndex = files.findIndex(f => f.id === id);
-      if (fileIndex === -1) return;
+      const lang = getLangFromFilename(current.name);
+      codeHighlightContent.className = `language-${lang}`;
+      codeHighlightContent.textContent = codeInput.value + (codeInput.value.endsWith("\n") ? " " : "");
+      Prism.highlightElement(codeHighlightContent);
+    }
 
-      const deletedName = files[fileIndex].name;
-      files.splice(fileIndex, 1);
-
-      if (activeFileId === id) {
-        if (files.length > 0) {
-          const nextIndex = Math.min(fileIndex, files.length - 1);
-          activeFileId = files[nextIndex].id;
-        } else {
-          activeFileId = null;
-        }
+    function updateLineNumbers() {
+      const lines = codeInput.value.split("\n").length;
+      let html = "";
+      for (let i = 1; i <= lines; i++) {
+        html += i + "<br>";
       }
-
-      appendConsoleLog('warn', [`Fichier supprimé : ${deletedName}`]);
-      renderWorkspace();
-      updatePreview();
-    };
-
-    // Modale de création / renommage
-    function openCreateModal() {
-      modalMode = 'create';
-      targetRenameId = null;
-      modalTitle.textContent = '> NOUVEAU_FICHIER';
-      fileNameInput.value = '';
-      modalErrorMsg.classList.add('hidden');
-      fileModal.classList.remove('hidden');
-      setTimeout(() => fileNameInput.focus(), 50);
+      lineNumbersEl.innerHTML = html;
     }
 
-    window.openRenameModal = function(id, event) {
-      if (event) event.stopPropagation();
-      const file = files.find(f => f.id === id);
-      if (!file) return;
-
-      modalMode = 'rename';
-      targetRenameId = id;
-      modalTitle.textContent = `> RENOMMER : ${file.name}`;
-      fileNameInput.value = file.name;
-      modalErrorMsg.classList.add('hidden');
-      fileModal.classList.remove('hidden');
-      setTimeout(() => fileNameInput.focus(), 50);
-    };
-
-    function closeFileModal() {
-      fileModal.classList.add('hidden');
+    function updateCursorPosition() {
+      const textBefore = codeInput.value.substring(0, codeInput.selectionStart);
+      const lines = textBefore.split("\n");
+      const ln = lines.length;
+      const col = lines[lines.length - 1].length + 1;
+      cursorPos.textContent = `Ln ${ln}, Col ${col}`;
     }
 
-    document.getElementById('btnAddFile').addEventListener('click', openCreateModal);
-    document.getElementById('btnEmptyAddFile').addEventListener('click', openCreateModal);
-    document.getElementById('btnCloseModal').addEventListener('click', closeFileModal);
-    document.getElementById('btnCancelModal').addEventListener('click', closeFileModal);
-
-    // --- IMPORTATION DE FICHIERS LOCAUX (BOUTON + GLISSER-DÉPOSER) ---
-    const hiddenFileInput = document.getElementById('hiddenFileInput');
-    const btnImportFile = document.getElementById('btnImportFile');
-    const btnEmptyImportFile = document.getElementById('btnEmptyImportFile');
-
-    function triggerFileImport() {
-      hiddenFileInput.value = '';
-      hiddenFileInput.click();
-    }
-
-    btnImportFile.addEventListener('click', triggerFileImport);
-    btnEmptyImportFile.addEventListener('click', triggerFileImport);
-
-    function handleImportedFileList(fileList) {
-      if (!fileList || fileList.length === 0) return;
-
-      Array.from(fileList).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const content = event.target.result;
-          const existing = files.find(f => f.name.toLowerCase() === file.name.toLowerCase());
-
-          if (existing) {
-            existing.content = content;
-            activeFileId = existing.id;
-            appendConsoleLog('info', [`Fichier mis à jour via import : ${file.name}`]);
-          } else {
-            const newFile = {
-              id: 'file-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-              name: file.name,
-              content: content
-            };
-            files.push(newFile);
-            activeFileId = newFile.id;
-            appendConsoleLog('info', [`Fichier importé : ${file.name}`]);
-          }
-
-          renderWorkspace();
-          updatePreview();
-        };
-        reader.onerror = function() {
-          appendConsoleLog('error', [`Erreur lors de la lecture du fichier : ${file.name}`]);
-        };
-        reader.readAsText(file);
-      });
-    }
-
-    hiddenFileInput.addEventListener('change', (e) => {
-      handleImportedFileList(e.target.files);
+    // Synchronisation du défilement
+    codeInput.addEventListener("scroll", () => {
+      codeHighlight.scrollTop = codeInput.scrollTop;
+      codeHighlight.scrollLeft = codeInput.scrollLeft;
+      lineNumbersEl.scrollTop = codeInput.scrollTop;
     });
 
-    // Support du Glisser-Déposer (Drag & Drop) sur l'explorateur et l'éditeur
-    [fileExplorer, editorPanel].forEach(dropZone => {
-      dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropZone.classList.add('ring-1', 'ring-inset', 'ring-current');
-      });
+    // Saisie dans l'éditeur
+    codeInput.addEventListener("input", () => {
+      const current = files.find(f => f.name === activeFileName);
+      if (!current) return;
 
-      dropZone.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropZone.classList.remove('ring-1', 'ring-inset', 'ring-current');
-      });
+      current.content = codeInput.value;
+      updateHighlighting();
+      updateLineNumbers();
+      updateCursorPosition();
 
-      dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropZone.classList.remove('ring-1', 'ring-inset', 'ring-current');
-        if (e.dataTransfer && e.dataTransfer.files.length > 0) {
-          handleImportedFileList(e.dataTransfer.files);
-        }
-      });
+      if (document.getElementById("auto-run").checked) {
+        clearTimeout(runTimeout);
+        runTimeout = setTimeout(runPreview, 350);
+      }
     });
 
-    // Modèle de contenu initial lors de la création d'un nouveau fichier
-    function getStarterTemplate(filename) {
-      const ext = filename.split('.').pop().toLowerCase();
-      if (ext === 'html' || ext === 'htm') {
-        return `<!DOCTYPE html>\n<html lang="fr">\n<head>\n  <meta charset="UTF-8">\n  <title>${filename}</title>\n</head>\n<body>\n  <h1>${filename}</h1>\n</body>\n</html>`;
-      }
-      if (ext === 'css') {
-        return `/* Feuille de style : ${filename} */\nbody {\n  margin: 0;\n  padding: 1rem;\n  font-family: monospace;\n}\n`;
-      }
-      if (ext === 'js') {
-        return `// Script : ${filename}\nconsole.log("${filename} chargé !");\n`;
-      }
-      if (ext === 'json') {
-        return `{\n  "projet": "CforCodeEditor",\n  "fichier": "${filename}"\n}\n`;
-      }
-      return '';
-    }
+    codeInput.addEventListener("click", updateCursorPosition);
+    codeInput.addEventListener("keyup", updateCursorPosition);
 
-    fileModalForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const rawName = fileNameInput.value.trim();
-
-      if (!rawName) {
-        modalErrorMsg.textContent = 'Erreur : Veuillez saisir un nom de fichier.';
-        modalErrorMsg.classList.remove('hidden');
-        return;
+    // Support de la touche Tabulation
+    codeInput.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const start = codeInput.selectionStart;
+        const end = codeInput.selectionEnd;
+        codeInput.value = codeInput.value.substring(0, start) + "  " + codeInput.value.substring(end);
+        codeInput.selectionStart = codeInput.selectionEnd = start + 2;
+        codeInput.dispatchEvent(new Event("input"));
       }
-
-      // Vérifier les doublons
-      const duplicate = files.find(f => f.name.toLowerCase() === rawName.toLowerCase() && f.id !== targetRenameId);
-      if (duplicate) {
-        modalErrorMsg.textContent = `Erreur : Le fichier "${rawName}" existe déjà.`;
-        modalErrorMsg.classList.remove('hidden');
-        return;
-      }
-
-      if (modalMode === 'create') {
-        const newFile = {
-          id: 'file-' + Date.now(),
-          name: rawName,
-          content: getStarterTemplate(rawName)
-        };
-        files.push(newFile);
-        activeFileId = newFile.id;
-        appendConsoleLog('info', [`Fichier créé : ${rawName}`]);
-      } else if (modalMode === 'rename' && targetRenameId) {
-        const file = files.find(f => f.id === targetRenameId);
-        if (file) {
-          const oldName = file.name;
-          file.name = rawName;
-          appendConsoleLog('info', [`Fichier renommé : ${oldName} -> ${rawName}`]);
-        }
-      }
-
-      closeFileModal();
-      renderWorkspace();
-      updatePreview();
     });
 
-    // --- 9. COMPILATION ET APERÇU EN DIRECT ---
-    let previewTimer = null;
-    function debouncePreview() {
-      clearTimeout(previewTimer);
-      previewTimer = setTimeout(updatePreview, 500);
-    }
+    // Compilation et exécution dans l'iframe
+    function buildCombinedHTML() {
+      const htmlFile = files.find(f => f.name.toLowerCase().endsWith(".html"));
+      const cssFiles = files.filter(f => f.name.toLowerCase().endsWith(".css"));
+      const jsFiles = files.filter(f => f.name.toLowerCase().endsWith(".js"));
 
-    function updatePreview() {
-      // Chercher le fichier HTML principal (index.html ou le premier .html, ou le fichier actif s'il est .html)
-      const activeFile = files.find(f => f.id === activeFileId);
-      let htmlFile = (activeFile && activeFile.name.toLowerCase().endsWith('.html'))
-        ? activeFile
-        : files.find(f => f.name.toLowerCase() === 'index.html') || files.find(f => f.name.toLowerCase().endsWith('.html'));
+      let html = htmlFile
+        ? htmlFile.content
+        : `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body></body></html>`;
 
-      const cssFiles = files.filter(f => f.name.toLowerCase().endsWith('.css'));
-      const jsFiles = files.filter(f => f.name.toLowerCase().endsWith('.js'));
+      const styles = cssFiles.map(f => `<style>/* ${f.name} */\n${f.content}</style>`).join("\n");
 
-      if (!htmlFile && cssFiles.length === 0 && jsFiles.length === 0) {
-        previewFileBadge.textContent = '[AUCUN RENDU HTML]';
-        previewIframe.srcdoc = `
-          <html>
-            <body style="background:#070907;color:#5a7a61;font-family:monospace;display:flex;align-items:center;justify-content:center;height:90vh;margin:0;text-align:center;">
-              <div>
-                <div style="font-size:1.2rem;margin-bottom:0.5rem;">&gt;_ STDOUT EN ATTENTE</div>
-                <div style="font-size:0.8rem;">Créez un fichier index.html pour afficher l'aperçu web.</div>
-              </div>
-            </body>
-          </html>
-        `;
-        return;
-      }
-
-      previewFileBadge.textContent = htmlFile ? `[${htmlFile.name}]` : '[AUTO-HTML]';
-
-      const combinedCSS = cssFiles.map(f => `/* ${f.name} */\n${f.content}`).join('\n\n');
-      const combinedJS = jsFiles.map(f => `// ${f.name}\n${f.content}`).join('\n\n');
-      const baseHTML = htmlFile ? htmlFile.content : '<body></body>';
-
-      const consoleHookScript = `
+      const consoleBridge = `
         <script>
           (function() {
+            const send = (type, args) => {
+              try {
+                window.parent.postMessage({
+                  source: 'cforcode-preview',
+                  type: type,
+                  message: Array.from(args).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')
+                }, '*');
+              } catch(e) {}
+            };
             const origLog = console.log;
             const origWarn = console.warn;
-            const origError = console.error;
-            const origInfo = console.info;
-
-            function relay(level, args) {
-              window.parent.postMessage({
-                source: 'CFORCODE_IFRAME',
-                level: level,
-                payload: Array.from(args).map(item => {
-                  try {
-                    return typeof item === 'object' ? JSON.stringify(item, null, 2) : String(item);
-                  } catch (e) {
-                    return String(item);
-                  }
-                })
-              }, '*');
-            }
-
-            console.log = function(...a) { relay('log', a); origLog.apply(console, a); };
-            console.warn = function(...a) { relay('warn', a); origWarn.apply(console, a); };
-            console.error = function(...a) { relay('error', a); origError.apply(console, a); };
-            console.info = function(...a) { relay('info', a); origInfo.apply(console, a); };
-
-            window.onerror = function(msg, src, line) {
-              relay('error', ['Uncaught Error: ' + msg + ' (ligne ' + line + ')']);
-              return false;
+            const origErr = console.error;
+            console.log = function() { send('info', arguments); origLog.apply(console, arguments); };
+            console.warn = function() { send('warn', arguments); origWarn.apply(console, arguments); };
+            console.error = function() { send('error', arguments); origErr.apply(console, arguments); };
+            window.onerror = function(msg, url, line) {
+              send('error', [msg + ' (ligne ' + line + ')']);
             };
           })();
         <\/script>
       `;
 
-      // Assemblage propre du document final
-      let finalDoc = baseHTML;
-      if (finalDoc.includes('</head>')) {
-        finalDoc = finalDoc.replace('</head>', `<style>${combinedCSS}</style>${consoleHookScript}</head>`);
+      const scripts = jsFiles.map(f => `<script>/* ${f.name} */\n${f.content}<\/script>`).join("\n");
+
+      if (html.includes("</head>")) {
+        html = html.replace("</head>", `${styles}\n${consoleBridge}\n</head>`);
       } else {
-        finalDoc = `<head><style>${combinedCSS}</style>${consoleHookScript}</head>` + finalDoc;
+        html = `${styles}\n${consoleBridge}\n${html}`;
       }
 
-      if (finalDoc.includes('</body>')) {
-        finalDoc = finalDoc.replace('</body>', `<script>${combinedJS}<\/script></body>`);
+      if (html.includes("</body>")) {
+        html = html.replace("</body>", `${scripts}\n</body>`);
       } else {
-        finalDoc = finalDoc + `<script>${combinedJS}<\/script>`;
+        html = `${html}\n${scripts}`;
       }
 
-      previewIframe.srcdoc = finalDoc;
+      return html;
     }
 
-    document.getElementById('runBtn').addEventListener('click', updatePreview);
-    document.getElementById('refreshPreview').addEventListener('click', updatePreview);
+    function runPreview() {
+      const compiled = buildCombinedHTML();
+      previewFrame.srcdoc = compiled;
+      setStatus("Aperçu mis à jour.");
+    }
 
-    // --- 10. CONSOLE INTERACTIVE ---
-    window.addEventListener('message', (event) => {
-      if (event.data && event.data.source === 'CFORCODE_IFRAME') {
-        appendConsoleLog(event.data.level, event.data.payload);
+    window.addEventListener("message", (event) => {
+      if (event.data && event.data.source === "cforcode-preview") {
+        logToConsole(event.data.message, event.data.type);
       }
     });
 
-    function appendConsoleLog(level, messages) {
-      const line = document.createElement('div');
-      line.className = 'flex items-start space-x-2 border-b border-term-dim/40 pb-1 font-mono';
-
-      let prefix = '>';
-      let colorClass = 'text-term-text';
-
-      if (level === 'error') {
-        prefix = '[ERR]';
-        colorClass = 'text-red-400';
-      } else if (level === 'warn') {
-        prefix = '[WRN]';
-        colorClass = 'text-amber-400';
-      } else if (level === 'info') {
-        prefix = '[SYS]';
-        colorClass = 'text-term-accent';
-      }
-
-      line.innerHTML = `
-        <span class="${colorClass} font-bold shrink-0">${prefix}</span>
-        <span class="${colorClass} whitespace-pre-wrap break-all">${escapeHtml(messages.join(' '))}</span>
-      `;
-
-      consoleOutput.appendChild(line);
-      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    // Importation fiable de fichiers via FileReader
+    function triggerFileImport() {
+      fileImportInput.value = "";
+      fileImportInput.click();
     }
 
-    function escapeHtml(str) {
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
+    function processImportedFiles(fileList) {
+      if (!fileList || fileList.length === 0) return;
 
-    document.getElementById('clearConsoleBtn').addEventListener('click', () => {
-      consoleOutput.innerHTML = '';
-    });
+      let loadedCount = 0;
+      const total = fileList.length;
 
-    // Exécution directe de commandes dans la console
-    consoleInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const cmd = consoleInput.value.trim();
-        if (!cmd) return;
-        appendConsoleLog('log', [`$ ${cmd}`]);
-        consoleInput.value = '';
-
-        try {
-          const result = previewIframe.contentWindow.eval(cmd);
-          if (result !== undefined) {
-            appendConsoleLog('info', [typeof result === 'object' ? JSON.stringify(result) : String(result)]);
+      Array.from(fileList).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target.result;
+          const existing = files.find(f => f.name === file.name);
+          if (existing) {
+            existing.content = content;
+            logToConsole(`Fichier mis à jour : ${file.name}`, "sys");
+          } else {
+            files.push({ name: file.name, content: content });
+            logToConsole(`Fichier importé : ${file.name}`, "sys");
           }
-        } catch (err) {
-          appendConsoleLog('error', [err.message]);
-        }
-      }
+          activeFileName = file.name;
+          loadedCount++;
+
+          if (loadedCount === total) {
+            renderAll();
+            runPreview();
+            setStatus(`${total} fichier(s) importé(s).`);
+          }
+        };
+        reader.onerror = () => {
+          logToConsole(`Erreur lors de la lecture de ${file.name}`, "error");
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    fileImportInput.addEventListener("change", (e) => {
+      processImportedFiles(e.target.files);
     });
 
-    // --- 11. EXPORT / TÉLÉCHARGEMENT DU PROJET ---
-    document.getElementById('downloadBtn').addEventListener('click', () => {
-      if (files.length === 0) {
-        appendConsoleLog('error', ['Impossible d\'exporter : aucun fichier dans le projet.']);
-        return;
+    // Glisser-déposer (Drag & Drop)
+    ["sidebar", "editor-pane"].forEach(id => {
+      const zone = document.getElementById(id);
+
+      zone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.add("drag-over");
+      });
+
+      zone.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.remove("drag-over");
+      });
+
+      zone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.remove("drag-over");
+        if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+          processImportedFiles(e.dataTransfer.files);
+        }
+      });
+    });
+
+    // Gestion de la modale Création / Renommage
+    function openCreateModal() {
+      modalMode = "create";
+      modalTitle.textContent = "Créer un nouveau fichier";
+      modalFilename.value = "";
+      fileModal.classList.add("open");
+      setTimeout(() => modalFilename.focus(), 50);
+    }
+
+    function openRenameModal(oldName) {
+      modalMode = "rename";
+      targetRenameFile = oldName;
+      modalTitle.textContent = `Renommer ${oldName}`;
+      modalFilename.value = oldName;
+      fileModal.classList.add("open");
+      setTimeout(() => modalFilename.focus(), 50);
+    }
+
+    function closeModal() {
+      fileModal.classList.remove("open");
+    }
+
+    function confirmModal() {
+      const rawName = modalFilename.value.trim();
+      if (!rawName) return;
+
+      if (modalMode === "create") {
+        if (files.some(f => f.name === rawName)) {
+          logToConsole(`Le fichier "${rawName}" existe déjà.`, "error");
+          return;
+        }
+        files.push({ name: rawName, content: "" });
+        activeFileName = rawName;
+        logToConsole(`Fichier créé : ${rawName}`, "sys");
+      } else if (modalMode === "rename") {
+        const fileObj = files.find(f => f.name === targetRenameFile);
+        if (fileObj) {
+          fileObj.name = rawName;
+          if (activeFileName === targetRenameFile) {
+            activeFileName = rawName;
+          }
+          logToConsole(`Renommé : ${targetRenameFile} -> ${rawName}`, "sys");
+        }
       }
 
-      const htmlFile = files.find(f => f.name.toLowerCase() === 'index.html') || files.find(f => f.name.toLowerCase().endsWith('.html'));
-      const cssFiles = files.filter(f => f.name.toLowerCase().endsWith('.css'));
-      const jsFiles = files.filter(f => f.name.toLowerCase().endsWith('.js'));
+      closeModal();
+      renderAll();
+      runPreview();
+    }
 
-      let exportContent = '';
-      let exportFilename = 'cforcode-project.html';
+    modalFilename.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") confirmModal();
+      if (e.key === "Escape") closeModal();
+    });
 
-      if (htmlFile || cssFiles.length > 0 || jsFiles.length > 0) {
-        const cssBlock = cssFiles.map(f => f.content).join('\n');
-        const jsBlock = jsFiles.map(f => f.content).join('\n');
-        const bodyBlock = htmlFile ? htmlFile.content : '<h1>Projet CforCodeEditor</h1>';
-
-        exportContent = `<!DOCTYPE html>\n<html lang="fr">\n<head>\n<meta charset="UTF-8">\n<title>Projet CforCodeEditor</title>\n<style>\n${cssBlock}\n</style>\n</head>\n<body>\n${bodyBlock}\n<script>\n${jsBlock}\n<\/script>\n</body>\n</html>`;
-      } else {
-        // Export du fichier actif brut s'il n'y a pas de code web
-        const active = files.find(f => f.id === activeFileId) || files[0];
-        exportContent = active.content;
-        exportFilename = active.name;
-      }
-
-      const blob = new Blob([exportContent], { type: 'text/plain;charset=utf-8' });
+    // Téléchargement du projet compilé
+    function downloadProject() {
+      const fullHtml = buildCombinedHTML();
+      const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = exportFilename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "CforCodeEditor-export.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      logToConsole("Projet exporté sous CforCodeEditor-export.html", "sys");
+    }
 
-      appendConsoleLog('info', [`Projet exporté sous "${exportFilename}".`]);
-    });
-
-    // --- 12. REDIMENSIONNEMENT DES PANNEAUX (SPLITTERS) ---
-    const resizerH = document.getElementById('resizerH');
-    const editorPanel = document.getElementById('editorPanel');
-    const previewPanel = document.getElementById('previewPanel');
-    const mainContainer = document.getElementById('mainContainer');
-    const fileExplorer = document.getElementById('fileExplorer');
-
-    const resizerV = document.getElementById('resizerV');
-    const iframeContainer = document.getElementById('iframeContainer');
-    const consoleContainer = document.getElementById('consoleContainer');
-
-    let isDraggingH = false;
-    let isDraggingV = false;
-
-    resizerH.addEventListener('mousedown', () => {
-      isDraggingH = true;
-      resizerH.classList.add('dragging');
-      document.body.style.cursor = 'col-resize';
-    });
-
-    resizerV.addEventListener('mousedown', () => {
-      isDraggingV = true;
-      resizerV.classList.add('dragging');
-      document.body.style.cursor = 'row-resize';
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (isDraggingH) {
-        const containerRect = mainContainer.getBoundingClientRect();
-        const sidebarWidth = fileExplorer.offsetWidth;
-        const availableWidth = containerRect.width - sidebarWidth;
-        const editorWidth = e.clientX - containerRect.left - sidebarWidth;
-        const percent = (editorWidth / availableWidth) * 100;
-
-        if (percent > 20 && percent < 80) {
-          editorPanel.style.flex = 'none';
-          editorPanel.style.width = `${editorWidth}px`;
-          previewPanel.style.flex = '1';
+    // Changement de thème
+    document.querySelectorAll(".theme-dot").forEach(dot => {
+      dot.addEventListener("click", () => {
+        document.querySelectorAll(".theme-dot").forEach(d => d.classList.remove("active"));
+        dot.classList.add("active");
+        const theme = dot.getAttribute("data-set-theme");
+        if (theme === "green") {
+          document.body.removeAttribute("data-theme");
+        } else {
+          document.body.setAttribute("data-theme", theme);
         }
-      }
-
-      if (isDraggingV) {
-        const previewRect = previewPanel.getBoundingClientRect();
-        const topHeight = e.clientY - previewRect.top;
-        const topPercent = (topHeight / previewRect.height) * 100;
-
-        if (topPercent > 20 && topPercent < 80) {
-          iframeContainer.style.height = `${topPercent}%`;
-          consoleContainer.style.height = `${100 - topPercent}%`;
-        }
-      }
+      });
     });
 
-    document.addEventListener('mouseup', () => {
-      if (isDraggingH || isDraggingV) {
-        isDraggingH = false;
-        isDraggingV = false;
-        resizerH.classList.remove('dragging');
-        resizerV.classList.remove('dragging');
-        document.body.style.cursor = 'default';
-        if (cmInstance) cmInstance.refresh();
-      }
+    // Écouteurs des boutons
+    document.getElementById("btn-start-demo").addEventListener("click", () => startEditor("demo"));
+    document.getElementById("btn-start-empty").addEventListener("click", () => startEditor("empty"));
+    document.getElementById("btn-home").addEventListener("click", () => bootScreen.classList.remove("hidden"));
+    document.getElementById("btn-mode").addEventListener("click", () => bootScreen.classList.remove("hidden"));
+    document.getElementById("btn-run").addEventListener("click", runPreview);
+    document.getElementById("btn-download").addEventListener("click", downloadProject);
+    document.getElementById("btn-new-file").addEventListener("click", openCreateModal);
+    document.getElementById("btn-empty-new").addEventListener("click", openCreateModal);
+    document.getElementById("btn-import-file").addEventListener("click", triggerFileImport);
+    document.getElementById("btn-empty-import").addEventListener("click", triggerFileImport);
+    document.getElementById("btn-modal-cancel").addEventListener("click", closeModal);
+    document.getElementById("btn-modal-confirm").addEventListener("click", confirmModal);
+    document.getElementById("btn-clear-console").addEventListener("click", () => {
+      consoleLogsEl.innerHTML = "";
     });
   </script>
 </body>
