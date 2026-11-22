@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CforCode - quiz lsf</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #3a6ea5;
+      background-image: linear-gradient(135deg, #245edb 0%, #3a6ea5 50%, #5a8de4 100%);
+      font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif;
+      font-size: 13px;
+      color: #000000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Fenêtre Windows XP Luna */
+    .xp-window {
+      width: 100%;
+      max-width: 620px;
+      background-color: #ece9d8;
+      border: 3px solid #0054e3;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+    }
+
+    /* Barre de titre XP */
+    .xp-titlebar {
+      background: linear-gradient(180deg, #0997ff 0%, #0053ee 8%, #0050ee 40%, #06f 88%, #06f 93%, #005bff 95%, #003dd7 96%, #003dd7 100%);
+      height: 30px;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+      font-weight: bold;
+      text-shadow: 1px 1px 1px #0f1089;
+      user-select: none;
+    }
+
+    .xp-title-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .xp-title-left img {
+      width: 16px;
+      height: 16px;
+    }
+
+    .xp-controls {
+      display: flex;
+      gap: 3px;
+    }
+
+    .xp-ctrl-btn {
+      width: 21px;
+      height: 21px;
+      border: 1px solid #ffffff;
+      border-radius: 3px;
+      background: linear-gradient(180deg, #4b91ff 0%, #1c65e2 100%);
+      color: white;
+      font-weight: bold;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .xp-ctrl-btn.close {
+      background: linear-gradient(180deg, #f37b63 0%, #d42b14 100%);
+    }
+
+    /* Bannière d'assistant d'installation */
+    .xp-wizard-banner {
+      background-color: #ffffff;
+      border-bottom: 1px solid #aca899;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .xp-wizard-banner h1 {
+      font-size: 16px;
+      color: #000000;
+      margin-bottom: 4px;
+    }
+
+    .xp-wizard-banner p {
+      font-size: 12px;
+      color: #444444;
+    }
+
+    .xp-banner-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #0054e3, #3c8df7);
+      border: 2px solid #003399;
+      border-radius: 6px;
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+
+    /* Contenu principal */
+    .xp-content {
+      padding: 20px;
+    }
+
+    .xp-groupbox {
+      border: 1px solid #d0d0bf;
+      border-radius: 4px;
+      padding: 14px;
+      margin-bottom: 16px;
+      background-color: #f5f4ea;
+      position: relative;
+    }
+
+    .xp-groupbox-title {
+      position: absolute;
+      top: -9px;
+      left: 10px;
+      background-color: #ece9d8;
+      padding: 0 6px;
+      color: #0046d5;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .xp-description {
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .xp-meta-list {
+      list-style: none;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .xp-meta-list li strong {
+      display: inline-block;
+      width: 135px;
+      color: #333333;
+    }
+
+    /* Zone SHA256 */
+    .sha-container {
+      margin-top: 8px;
+    }
+
+    .sha-box {
+      display: flex;
+      gap: 6px;
+      margin-top: 5px;
+    }
+
+    .xp-input {
+      flex: 1;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 11px;
+      padding: 4px 6px;
+      border: 1px solid #7f9db9;
+      background-color: #ffffff;
+      color: #222222;
+      outline: none;
+    }
+
+    /* Boutons style Windows XP */
+    .xp-btn {
+      font-family: 'Tahoma', sans-serif;
+      font-size: 12px;
+      color: #000000;
+      background: linear-gradient(180deg, #ffffff 0%, #ecebe5 86%, #d8d0c4 100%);
+      border: 1px solid #003c74;
+      border-radius: 3px;
+      padding: 5px 14px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: inset 0 1px 0 #ffffff;
+    }
+
+    .xp-btn:hover {
+      border-color: #003c74;
+      box-shadow: inset 0 0 0 1px #f8b330, inset 0 1px 0 #ffffff;
+    }
+
+    .xp-btn:active {
+      background: linear-gradient(180deg, #e5e4dc 0%, #f2f1ec 100%);
+      box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.25);
+    }
+
+    .xp-btn-primary {
+      font-weight: bold;
+      padding: 8px 20px;
+      font-size: 13px;
+      box-shadow: inset 0 0 0 1px #69a1f8, inset 0 1px 0 #ffffff;
+    }
+
+    .xp-btn-primary:hover {
+      box-shadow: inset 0 0 0 1px #f8b330, inset 0 1px 0 #ffffff;
+    }
+
+    /* Barre d'actions en bas */
+    .xp-footer-actions {
+      border-top: 1px solid #aca899;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      background-color: #ece9d8;
+    }
+
+    .xp-notice {
+      font-size: 11px;
+      color: #555555;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="xp-window">
+    <!-- Barre de titre -->
+    <div class="xp-titlebar">
+      <div class="xp-title-left">
+        <img src="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png" alt="Icône CforCode">
+        <span>Assistant d'installation - Quiz LSF</span>
+      </div>
+      <div class="xp-controls">
+        <div class="xp-ctrl-btn" title="Réduire">_</div>
+        <div class="xp-ctrl-btn" title="Agrandir">□</div>
+        <div class="xp-ctrl-btn close" title="Fermer">X</div>
+      </div>
+    </div>
+
+    <!-- Bannière supérieure -->
+    <div class="xp-wizard-banner">
+      <div>
+        <h1>Quiz LSF — Apprendre la Langue des Signes</h1>
+        <p>Bienvenue dans l'assistant de téléchargement de l'application.</p>
+      </div>
+      <div class="xp-banner-badge">LSF</div>
+    </div>
+
+    <!-- Corps de la fenêtre -->
+    <div class="xp-content">
+      <div class="xp-groupbox">
+        <span class="xp-groupbox-title">Présentation de l'application</span>
+        <p class="xp-description">
+          <strong>Quiz LSF</strong> est un logiciel éducatif conçu pour apprendre et réviser la Langue des Signes Française (LSF) de manière ludique et interactive à travers des séries de quiz.
+        </p>
+        <ul class="xp-meta-list">
+          <li><strong>Programmeur :</strong> Progra31</li>
+          <li><strong>Version :</strong> 1.0</li>
+          <li><strong>Système requis :</strong> Windows</li>
+          <li><strong>Langue :</strong> Français</li>
+          <li><strong>Fichier :</strong> instaler.exe</li>
+        </ul>
+      </div>
+
+      <div class="xp-groupbox">
+        <span class="xp-groupbox-title">Vérification d'intégrité (SHA256)</span>
+        <p style="font-size: 12px; color: #333;">
+          Vous pouvez vérifier que votre fichier n'a pas été altéré après le téléchargement grâce à cette empreinte :
+        </p>
+        <div class="sha-container">
+          <div class="sha-box">
+            <input type="text" id="shaInput" class="xp-input" readonly value="064874ae6476d15dc0c58cab813bf31a07df8b7549b9b6b2f00bf2153f49818a">
+            <button type="button" class="xp-btn" onclick="copySha()" id="copyBtn">Copier</button>
+          </div>
+        </div>
+        <p class="xp-notice">
+          Note : Si Windows SmartScreen affiche un avertissement lors de l'exécution, cliquez sur « Informations complémentaires » puis « Exécuter quand même ».
+        </p>
+      </div>
+    </div>
+
+    <!-- Barre de boutons inférieurs -->
+    <div class="xp-footer-actions">
+      <a href="https://cforcode.cforcode.workers.dev/" class="xp-btn">
+        &lt; Retour au site web
+      </a>
+
+      <div style="display: flex; gap: 8px;">
+        <a href="https://github.com/progra31/lsf-quiz/releases/tag/1.0" target="_blank" rel="noopener noreferrer" class="xp-btn">
+          Voir la Release
+        </a>
+        <a href="https://github.com/progra31/lsf-quiz/releases/download/1.0/instaler.exe" class="xp-btn xp-btn-primary">
+          Télécharger instaler.exe &gt;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copySha() {
+      const shaInput = document.getElementById('shaInput');
+      const copyBtn = document.getElementById('copyBtn');
+      shaInput.select();
+      shaInput.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(shaInput.value).then(() => {
+        copyBtn.textContent = 'Copié !';
+        setTimeout(() => {
+          copyBtn.textContent = 'Copier';
+        }, 2000);
+      });
+    }
+  </script>
+
+</body>
+</html>
