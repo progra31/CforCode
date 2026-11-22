@@ -1,60 +1,21 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CforCodeEditor — Terminal IDE</title>
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png" />
-
-  <!-- Polices Monospace -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Prism.js pour la coloration syntaxique -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
-
+<!-- ... existing code ... -->
   <style>
     :root {
-      --bg-main: #121614;
-      --bg-panel: #181d1a;
-      --bg-elevated: #202723;
-      --border: #2c3831;
-      --accent: #4ade80;
-      --accent-soft: rgba(74, 222, 128, 0.14);
-      --text-main: #e2ebe5;
-      --text-dim: #8a9e91;
+      --grad-c1: #0f172a;
+      --grad-c2: #1e3a8a;
+      --grad-angle: 135deg;
+      --bg-gradient: linear-gradient(var(--grad-angle), var(--grad-c1), var(--grad-c2));
+      --bg-main: #0f172a;
+      --bg-panel: rgba(15, 23, 42, 0.78);
+      --bg-elevated: rgba(30, 58, 138, 0.35);
+      --border: rgba(56, 189, 248, 0.28);
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.16);
+      --text-main: #f1f5f9;
+      --text-dim: #94a3b8;
       --danger: #f87171;
       --warn: #fbbf24;
       --font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
-
-    [data-theme="amber"] {
-      --bg-main: #171412;
-      --bg-panel: #1f1b18;
-      --bg-elevated: #29231f;
-      --border: #3d332c;
-      --accent: #fbbf24;
-      --accent-soft: rgba(251, 191, 36, 0.14);
-      --text-main: #f3ece4;
-      --text-dim: #a8998c;
-    }
-
-    [data-theme="cyan"] {
-      --bg-main: #12161b;
-      --bg-panel: #181e26;
-      --bg-elevated: #212934;
-      --border: #2f3b4a;
-      --accent: #38bdf8;
-      --accent-soft: rgba(56, 189, 248, 0.14);
-      --text-main: #e5eff8;
-      --text-dim: #8da1b5;
     }
 
     * {
@@ -66,13 +27,15 @@
     body {
       font-family: var(--font-mono);
       background-color: var(--bg-main);
+      background-image: var(--bg-gradient);
+      background-attachment: fixed;
       color: var(--text-main);
       height: 100vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       font-size: 13px;
-      transition: background-color 0.2s, color 0.2s;
+      transition: background 0.25s, color 0.2s;
     }
 
     /* Écran d'accueil (Boot Screen) */
@@ -80,6 +43,7 @@
       position: fixed;
       inset: 0;
       background-color: var(--bg-main);
+      background-image: var(--bg-gradient);
       z-index: 100;
       display: flex;
       align-items: center;
@@ -95,111 +59,19 @@
       width: 100%;
       max-width: 640px;
       background-color: var(--bg-panel);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 32px;
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
     }
 
-    .boot-header {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      margin-bottom: 24px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .boot-logo {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
-      border-radius: 8px;
-      background: var(--bg-elevated);
-      padding: 6px;
-      border: 1px solid var(--border);
-    }
-
-    .boot-title h1 {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 0.5px;
-    }
-
-    .boot-title p {
-      color: var(--text-dim);
-      font-size: 12px;
-      margin-top: 4px;
-    }
-
-    .boot-prompt {
-      color: var(--text-main);
-      margin-bottom: 16px;
-      font-size: 13px;
-    }
-
-    .boot-prompt span {
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .boot-choices {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    @media (max-width: 560px) {
-      .boot-choices {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .choice-card {
-      background-color: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 18px;
-      text-align: left;
-      color: var(--text-main);
-      font-family: var(--font-mono);
-      cursor: pointer;
-      transition: border-color 0.15s, background-color 0.15s, transform 0.1s;
-    }
-
-    .choice-card:hover {
-      border-color: var(--accent);
-      background-color: var(--accent-soft);
-      transform: translateY(-2px);
-    }
-
-    .choice-key {
-      display: inline-block;
-      color: var(--accent);
-      font-weight: 700;
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
-
-    .choice-name {
-      display: block;
-      font-weight: 600;
-      font-size: 14px;
-      margin-bottom: 6px;
-    }
-
-    .choice-desc {
-      display: block;
-      font-size: 11.5px;
-      color: var(--text-dim);
-      line-height: 1.45;
-    }
-
+    /* ... existing code ... -->
     /* En-tête principal */
     header {
       height: 46px;
       background-color: var(--bg-panel);
+      backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -207,96 +79,110 @@
       padding: 0 14px;
       user-select: none;
       flex-shrink: 0;
+      position: relative;
+      z-index: 30;
     }
 
-    .brand {
+    /* ... existing code ... -->
+    .btn-accent:hover {
+      background-color: var(--accent);
+      color: #0b1120;
+    }
+
+    /* Panneau de personnalisation du dégradé */
+    .gradient-popover-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .gradient-popover {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 280px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65);
+      z-index: 150;
+      display: none;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .gradient-popover.open {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
     }
 
-    .brand img {
-      width: 26px;
-      height: 26px;
-      object-fit: contain;
-      border-radius: 4px;
-    }
-
-    .brand-name {
+    .popover-title {
+      font-size: 11.5px;
       font-weight: 700;
-      font-size: 14px;
       color: var(--accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
     }
 
-    .brand-path {
-      color: var(--text-dim);
-      font-size: 12px;
-    }
-
-    .toolbar {
+    .popover-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: var(--text-main);
       gap: 8px;
     }
 
-    .btn {
-      background-color: var(--bg-elevated);
+    .popover-row input[type="color"] {
+      width: 38px;
+      height: 24px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .popover-row select {
+      background: var(--bg-elevated);
       color: var(--text-main);
       border: 1px solid var(--border);
-      padding: 5px 10px;
       border-radius: 4px;
+      padding: 3px 6px;
       font-family: var(--font-mono);
-      font-size: 11.5px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
+      font-size: 11px;
+      outline: none;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 6px;
-      transition: all 0.15s;
     }
 
-    .btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .btn-accent {
-      background-color: var(--accent-soft);
-      border-color: var(--accent);
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .btn-accent:hover {
-      background-color: var(--accent);
-      color: var(--bg-main);
-    }
-
-    .theme-dots {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin: 0 6px;
-      padding: 4px 8px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
+    .preset-btn {
+      height: 22px;
       border-radius: 4px;
-    }
-
-    .theme-dot {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.25);
       cursor: pointer;
-      opacity: 0.7;
-      transition: transform 0.15s, opacity 0.15s;
+      transition: transform 0.12s;
     }
 
-    .theme-dot:hover,
-    .theme-dot.active {
-      opacity: 1;
-      transform: scale(1.2);
+    .preset-btn:hover {
+      transform: scale(1.06);
+      border-color: #fff;
+    }
+
+    .popover-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+      font-size: 10.5px;
+      color: var(--text-dim);
     }
 
     /* Espace de travail principal */
@@ -306,219 +192,13 @@
       overflow: hidden;
     }
 
-    /* Barre latérale explorateur */
-    .sidebar {
-      width: 235px;
-      background-color: var(--bg-panel);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      transition: background-color 0.15s, border-color 0.15s;
-    }
-
-    .sidebar.drag-over {
-      background-color: var(--accent-soft);
-      border-right: 2px dashed var(--accent);
-    }
-
-    .sidebar-header {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-dim);
-      letter-spacing: 0.5px;
-    }
-
-    .sidebar-actions {
-      display: flex;
-      gap: 4px;
-    }
-
-    .icon-btn {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      font-family: var(--font-mono);
-      font-size: 11px;
-      padding: 3px 7px;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-
-    .icon-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .file-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 6px;
-    }
-
-    .file-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 7px 9px;
-      border-radius: 4px;
-      cursor: pointer;
-      color: var(--text-dim);
-      margin-bottom: 2px;
-      border: 1px solid transparent;
-    }
-
-    .file-item:hover {
-      background-color: var(--bg-elevated);
-      color: var(--text-main);
-    }
-
-    .file-item.active {
-      background-color: var(--accent-soft);
-      border-color: var(--border);
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .file-info {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .file-badge {
-      font-size: 10px;
-      padding: 1px 4px;
-      border-radius: 3px;
-      background: var(--bg-main);
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-    }
-
-    .file-item.active .file-badge {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .file-controls {
-      display: none;
-      gap: 4px;
-    }
-
-    .file-item:hover .file-controls {
-      display: flex;
-    }
-
-    .file-ctrl-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-dim);
-      cursor: pointer;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      padding: 0 3px;
-    }
-
-    .file-ctrl-btn:hover {
-      color: var(--accent);
-    }
-
-    .file-ctrl-btn.del:hover {
-      color: var(--danger);
-    }
-
-    .drop-hint {
-      padding: 10px;
-      margin: 8px;
-      border: 1px dashed var(--border);
-      border-radius: 4px;
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-dim);
-    }
-
-    /* Zone Éditeur + Aperçu */
-    .main-area {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
-
-    .editor-pane {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid var(--border);
-      min-width: 0;
-      position: relative;
-    }
-
-    .editor-pane.drag-over::after {
-      content: "Déposez vos fichiers ici pour les importer";
-      position: absolute;
-      inset: 10px;
-      background: var(--bg-panel);
-      border: 2px dashed var(--accent);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      font-weight: 600;
-      z-index: 20;
-      opacity: 0.95;
-    }
-
-    .tabs-bar {
-      height: 35px;
-      background-color: var(--bg-panel);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      overflow-x: auto;
-      padding: 0 6px;
-      gap: 4px;
-    }
-
-    .tab {
-      padding: 5px 10px;
-      font-size: 12px;
-      color: var(--text-dim);
-      background: transparent;
-      border: 1px solid transparent;
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
-
-    .tab:hover {
-      color: var(--text-main);
-      background: var(--bg-elevated);
-    }
-
-    .tab.active {
-      color: var(--accent);
-      background: var(--bg-main);
-      border-color: var(--border);
-    }
-
+    /* ... existing code ... -->
     .editor-container {
       flex: 1;
       display: flex;
       position: relative;
       overflow: hidden;
-      background-color: var(--bg-main);
+      background-color: rgba(11, 17, 32, 0.65);
     }
 
     .line-numbers {
@@ -534,262 +214,28 @@
       line-height: 1.55;
     }
 
-    .code-wrapper {
-      position: relative;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    #code-highlight,
-    #code-input {
-      position: absolute;
-      inset: 0;
-      margin: 0;
-      padding: 14px;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      line-height: 1.55;
-      tab-size: 2;
-      white-space: pre;
-      overflow: auto;
-      border: none;
-      outline: none;
-    }
-
-    #code-highlight {
-      pointer-events: none;
-      background: transparent !important;
-      z-index: 1;
-    }
-
-    #code-highlight code {
-      font-family: var(--font-mono) !important;
-      background: transparent !important;
-      padding: 0 !important;
-      text-shadow: none !important;
-    }
-
-    #code-input {
-      z-index: 2;
-      background: transparent;
-      color: transparent;
-      caret-color: var(--accent);
-      resize: none;
-    }
-
-    #code-input::selection {
-      background: var(--accent-soft);
-    }
-
-    /* État vide (sans fichier) */
-    .empty-state {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      text-align: center;
-      color: var(--text-dim);
-      gap: 14px;
-    }
-
-    .empty-state.hidden {
-      display: none;
-    }
-
-    .empty-state h3 {
-      color: var(--text-main);
-      font-size: 15px;
-    }
-
-    .empty-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    /* Panneau droit : Aperçu + Console */
-    .preview-pane {
-      width: 45%;
-      display: flex;
-      flex-direction: column;
-      background-color: var(--bg-panel);
-      min-width: 280px;
-    }
-
-    .preview-header {
-      height: 35px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 12px;
-      font-size: 11.5px;
-      color: var(--text-dim);
-    }
-
-    .preview-frame-wrap {
-      flex: 1;
-      background: #ffffff;
-      position: relative;
-    }
-
-    iframe#preview-frame {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-
+    /* ... existing code ... -->
     /* Console intégrée */
     .console-panel {
       height: 165px;
       border-top: 1px solid var(--border);
-      background-color: var(--bg-main);
+      background-color: rgba(11, 17, 32, 0.85);
       display: flex;
       flex-direction: column;
     }
 
-    .console-header {
-      height: 28px;
-      padding: 0 10px;
-      background-color: var(--bg-panel);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 11px;
-      color: var(--text-dim);
-    }
-
-    .console-logs {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px 10px;
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .log-entry {
-      margin-bottom: 4px;
-      word-break: break-word;
-    }
-
-    .log-info { color: var(--text-main); }
-    .log-warn { color: var(--warn); }
-    .log-error { color: var(--danger); }
-    .log-sys { color: var(--accent); }
-
-    /* Barre de statut */
-    footer {
-      height: 25px;
-      background-color: var(--bg-panel);
-      border-top: 1px solid var(--border);
-      padding: 0 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 11px;
-      color: var(--text-dim);
-      flex-shrink: 0;
-    }
-
-    /* Modale personnalisée */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
+    /* ... existing code ... -->
     .modal-card {
-      background: var(--bg-panel);
+      background: #0f172a;
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 20px;
       width: 100%;
       max-width: 380px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
     }
 
-    .modal-card h4 {
-      color: var(--accent);
-      margin-bottom: 12px;
-      font-size: 14px;
-    }
-
-    .modal-input {
-      width: 100%;
-      background: var(--bg-main);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 8px 10px;
-      border-radius: 4px;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      margin-bottom: 14px;
-      outline: none;
-    }
-
-    .modal-input:focus {
-      border-color: var(--accent);
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Input fichier caché pour l'importation -->
-  <input type="file" id="file-import-input" multiple style="display:none" />
-
-  <!-- Écran d'accueil -->
-  <div id="boot-screen">
-    <div class="boot-box">
-      <div class="boot-header">
-        <img
-          src="https://raw.githubusercontent.com/progra31/CforCode/29b96fa79e3ae469d712bdf98046345462d7789c/icones/code%20editor%20icone.png"
-          alt="CforCodeEditor Logo"
-          class="boot-logo"
-        />
-        <div class="boot-title">
-          <h1>CforCodeEditor</h1>
-          <p>Environnement de développement web en terminal</p>
-        </div>
-      </div>
-
-      <div class="boot-prompt">
-        <span>root@cforcode:~$</span> Sélectionnez un mode de démarrage :
-      </div>
-
-      <div class="boot-choices">
-        <button class="choice-card" id="btn-start-demo">
-          <span class="choice-key">[1] PROGRAMME DE BASE</span>
-          <span class="choice-name">Charger le projet d'exemple</span>
-          <span class="choice-desc">Ouvre l'éditeur avec index.html, style.css et script.js préconfigurés.</span>
-        </button>
-
-        <button class="choice-card" id="btn-start-empty">
-          <span class="choice-key">[2] PROGRAMME VIDE</span>
-          <span class="choice-name">Démarrer sans fichier</span>
-          <span class="choice-desc">Ouvre un espace vierge pour créer ou importer vos propres fichiers.</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
+    /* ... existing code ... -->
   <!-- En-tête -->
   <header>
     <div class="brand" id="btn-home" title="Retourner au menu de démarrage">
@@ -802,10 +248,58 @@
     </div>
 
     <div class="toolbar">
-      <div class="theme-dots" title="Changer le thème du terminal">
-        <button class="theme-dot active" data-set-theme="green" style="background:#4ade80" title="Vert Terminal"></button>
-        <button class="theme-dot" data-set-theme="amber" style="background:#fbbf24" title="Ambre Doux"></button>
-        <button class="theme-dot" data-set-theme="cyan" style="background:#38bdf8" title="Cyan Ardoise"></button>
+      <!-- Personnalisation du dégradé avec sauvegarde -->
+      <div class="gradient-popover-wrap">
+        <button class="btn" id="btn-toggle-gradient" title="Personnaliser le dégradé de fond">
+          🎨 THÈME / DÉGRADÉ
+        </button>
+
+        <div class="gradient-popover" id="gradient-popover">
+          <div class="popover-title">
+            <span>DÉGRADÉ TERMINAL</span>
+            <button class="icon-btn" id="btn-reset-gradient" title="Réinitialiser le dégradé bleu par défaut">RESET</button>
+          </div>
+
+          <div class="popover-row">
+            <label for="grad-color-1">Couleur 1 (début)</label>
+            <input type="color" id="grad-color-1" value="#0f172a" />
+          </div>
+
+          <div class="popover-row">
+            <label for="grad-color-2">Couleur 2 (fin)</label>
+            <input type="color" id="grad-color-2" value="#1e3a8a" />
+          </div>
+
+          <div class="popover-row">
+            <label for="grad-accent">Couleur d'accent</label>
+            <input type="color" id="grad-accent" value="#38bdf8" />
+          </div>
+
+          <div class="popover-row">
+            <label for="grad-angle">Orientation</label>
+            <select id="grad-angle">
+              <option value="135deg">Diagonale (135°)</option>
+              <option value="90deg">Horizontale (90°)</option>
+              <option value="180deg">Verticale (180°)</option>
+              <option value="45deg">Inversée (45°)</option>
+            </select>
+          </div>
+
+          <div>
+            <div style="font-size:10.5px;color:var(--text-dim);margin-bottom:5px;">Préréglages rapides :</div>
+            <div class="preset-grid">
+              <button class="preset-btn" data-c1="#0f172a" data-c2="#1e3a8a" data-acc="#38bdf8" data-ang="135deg" style="background:linear-gradient(135deg,#0f172a,#1e3a8a)" title="Bleu Océan (Défaut)"></button>
+              <button class="preset-btn" data-c1="#091e2c" data-c2="#0e7490" data-acc="#22d3ee" data-ang="135deg" style="background:linear-gradient(135deg,#091e2c,#0e7490)" title="Bleu Lagon"></button>
+              <button class="preset-btn" data-c1="#131127" data-c2="#312e81" data-acc="#818cf8" data-ang="135deg" style="background:linear-gradient(135deg,#131127,#312e81)" title="Indigo Nuit"></button>
+              <button class="preset-btn" data-c1="#121816" data-c2="#14532d" data-acc="#4ade80" data-ang="135deg" style="background:linear-gradient(135deg,#121816,#14532d)" title="Émeraude Terminal"></button>
+            </div>
+          </div>
+
+          <div class="popover-footer">
+            <span id="grad-save-status">Sauvegardé auto</span>
+            <button class="icon-btn" id="btn-close-gradient">FERMER</button>
+          </div>
+        </div>
       </div>
 
       <button class="btn" id="btn-mode">MODE</button>
@@ -816,619 +310,123 @@
 
   <!-- Espace de travail -->
   <div class="workspace">
-    <!-- Explorateur de fichiers -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <span>FICHIERS</span>
-        <div class="sidebar-actions">
-          <button class="icon-btn" id="btn-new-file" title="Créer un nouveau fichier">+ FICHIER</button>
-          <button class="icon-btn" id="btn-import-file" title="Importer depuis votre ordinateur">IMPORTER</button>
-        </div>
-      </div>
+    <!-- ... existing code ... -->
+    // --- GESTION DU DÉGRADÉ PERSONNALISABLE AVEC SAUVEGARDE ---
+    const GRADIENT_STORAGE_KEY = "cforcode_gradient_theme_v1";
+    const DEFAULT_GRADIENT = {
+      c1: "#0f172a",
+      c2: "#1e3a8a",
+      accent: "#38bdf8",
+      angle: "135deg"
+    };
 
-      <div class="file-list" id="file-list"></div>
+    const gradColor1Input = document.getElementById("grad-color-1");
+    const gradColor2Input = document.getElementById("grad-color-2");
+    const gradAccentInput = document.getElementById("grad-accent");
+    const gradAngleSelect = document.getElementById("grad-angle");
+    const gradientPopover = document.getElementById("gradient-popover");
+    const gradSaveStatus = document.getElementById("grad-save-status");
 
-      <div class="drop-hint">
-        Glissez-déposez vos fichiers ici
-      </div>
-    </aside>
-
-    <!-- Zone principale -->
-    <main class="main-area">
-      <!-- Éditeur -->
-      <section class="editor-pane" id="editor-pane">
-        <div class="tabs-bar" id="tabs-bar"></div>
-
-        <!-- Vue vide quand aucun fichier n'est présent -->
-        <div class="empty-state hidden" id="empty-state">
-          <h3>Aucun fichier ouvert dans l'espace de travail</h3>
-          <p>Créez un nouveau fichier ou importez des fichiers existants depuis votre ordinateur.</p>
-          <div class="empty-actions">
-            <button class="btn btn-accent" id="btn-empty-new">+ NOUVEAU FICHIER</button>
-            <button class="btn" id="btn-empty-import">IMPORTER DES FICHIERS</button>
-          </div>
-        </div>
-
-        <!-- Éditeur de code -->
-        <div class="editor-container" id="editor-container">
-          <div class="line-numbers" id="line-numbers">1</div>
-          <div class="code-wrapper">
-            <pre id="code-highlight" aria-hidden="true"><code id="code-highlight-content" class="language-html"></code></pre>
-            <textarea id="code-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
-          </div>
-        </div>
-      </section>
-
-      <!-- Aperçu et console -->
-      <section class="preview-pane">
-        <div class="preview-header">
-          <span>APERÇU EN DIRECT</span>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="checkbox" id="auto-run" checked />
-            Auto-refresh
-          </label>
-        </div>
-
-        <div class="preview-frame-wrap">
-          <iframe id="preview-frame" sandbox="allow-scripts allow-modals"></iframe>
-        </div>
-
-        <div class="console-panel">
-          <div class="console-header">
-            <span>CONSOLE TERMINAL</span>
-            <button class="icon-btn" id="btn-clear-console">EFFACER</button>
-          </div>
-          <div class="console-logs" id="console-logs"></div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- Barre d'état -->
-  <footer>
-    <span id="status-msg">Prêt.</span>
-    <span id="cursor-pos">Ln 1, Col 1</span>
-  </footer>
-
-  <!-- Modale création / renommage -->
-  <div class="modal-backdrop" id="file-modal">
-    <div class="modal-card">
-      <h4 id="modal-title">Nouveau fichier</h4>
-      <input type="text" id="modal-filename" class="modal-input" placeholder="exemple: app.js" />
-      <div class="modal-actions">
-        <button class="btn" id="btn-modal-cancel">Annuler</button>
-        <button class="btn btn-accent" id="btn-modal-confirm">Valider</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Fichiers du programme de base
-    const DEFAULT_FILES = [
-      {
-        name: "index.html",
-        content: `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Démo CforCodeEditor</title>
-</head>
-<body>
-  <div class="card">
-    <h1>Bienvenue sur CforCodeEditor</h1>
-    <p>Modifiez le code HTML, CSS ou JS pour voir le résultat en direct.</p>
-    <button id="click-btn">Tester le script</button>
-    <p id="counter">Clics : 0</p>
-  </div>
-</body>
-</html>`
-      },
-      {
-        name: "style.css",
-        content: `body {
-  font-family: system-ui, sans-serif;
-  background: #f0f4f8;
-  color: #1e293b;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  margin: 0;
-}
-
-.card {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  text-align: center;
-  max-width: 400px;
-}
-
-button {
-  background: #16a34a;
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-button:hover {
-  background: #15803d;
-}`
-      },
-      {
-        name: "script.js",
-        content: `let count = 0;
-const btn = document.getElementById('click-btn');
-const counter = document.getElementById('counter');
-
-btn.addEventListener('click', () => {
-  count++;
-  counter.textContent = 'Clics : ' + count;
-  console.log('Bouton cliqué (' + count + ')');
-});`
-      }
-    ];
-
-    // État de l'application
-    let files = [];
-    let activeFileName = null;
-    let modalMode = "create"; // "create" ou "rename"
-    let targetRenameFile = null;
-    let runTimeout = null;
-
-    // Éléments DOM
-    const bootScreen = document.getElementById("boot-screen");
-    const fileListEl = document.getElementById("file-list");
-    const tabsBarEl = document.getElementById("tabs-bar");
-    const emptyStateEl = document.getElementById("empty-state");
-    const editorContainerEl = document.getElementById("editor-container");
-    const codeInput = document.getElementById("code-input");
-    const codeHighlight = document.getElementById("code-highlight");
-    const codeHighlightContent = document.getElementById("code-highlight-content");
-    const lineNumbersEl = document.getElementById("line-numbers");
-    const previewFrame = document.getElementById("preview-frame");
-    const consoleLogsEl = document.getElementById("console-logs");
-    const headerActiveFile = document.getElementById("header-active-file");
-    const statusMsg = document.getElementById("status-msg");
-    const cursorPos = document.getElementById("cursor-pos");
-    const fileImportInput = document.getElementById("file-import-input");
-
-    // Modale
-    const fileModal = document.getElementById("file-modal");
-    const modalTitle = document.getElementById("modal-title");
-    const modalFilename = document.getElementById("modal-filename");
-
-    // Utilitaires
-    function getLangFromFilename(filename) {
-      const ext = filename.split(".").pop().toLowerCase();
-      const map = {
-        html: "html",
-        htm: "html",
-        css: "css",
-        js: "javascript",
-        json: "json",
-        md: "markdown"
-      };
-      return map[ext] || "markup";
+    function hexToRgba(hex, alpha) {
+      const clean = hex.replace("#", "");
+      const num = parseInt(clean, 16);
+      const r = (num >> 16) & 255;
+      const g = (num >> 8) & 255;
+      const b = num & 255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
-    function getExtBadge(filename) {
-      const parts = filename.split(".");
-      return parts.length > 1 ? parts.pop().toUpperCase() : "TXT";
-    }
+    function applyGradientConfig(cfg, save = true) {
+      const root = document.documentElement.style;
+      root.setProperty("--grad-c1", cfg.c1);
+      root.setProperty("--grad-c2", cfg.c2);
+      root.setProperty("--grad-angle", cfg.angle);
+      root.setProperty("--bg-main", cfg.c1);
+      root.setProperty("--bg-panel", hexToRgba(cfg.c1, 0.82));
+      root.setProperty("--bg-elevated", hexToRgba(cfg.c2, 0.42));
+      root.setProperty("--accent", cfg.accent);
+      root.setProperty("--accent-soft", hexToRgba(cfg.accent, 0.16));
+      root.setProperty("--border", hexToRgba(cfg.accent, 0.3));
 
-    function logToConsole(message, type = "info") {
-      const div = document.createElement("div");
-      div.className = `log-entry log-${type}`;
-      const time = new Date().toLocaleTimeString("fr-FR", { hour12: false });
-      div.textContent = `[${time}] ${message}`;
-      consoleLogsEl.appendChild(div);
-      consoleLogsEl.scrollTop = consoleLogsEl.scrollHeight;
-    }
+      gradColor1Input.value = cfg.c1;
+      gradColor2Input.value = cfg.c2;
+      gradAccentInput.value = cfg.accent;
+      gradAngleSelect.value = cfg.angle;
 
-    function setStatus(text) {
-      statusMsg.textContent = text;
-    }
-
-    // Initialisation du mode
-    function startEditor(mode) {
-      if (mode === "demo") {
-        files = DEFAULT_FILES.map(f => ({ ...f }));
-        activeFileName = files[0].name;
-        logToConsole("Programme de base chargé.", "sys");
-      } else {
-        files = [];
-        activeFileName = null;
-        logToConsole("Espace de travail vide initialisé.", "sys");
-      }
-      bootScreen.classList.add("hidden");
-      renderAll();
-      runPreview();
-    }
-
-    // Rendu complet de l'interface
-    function renderAll() {
-      renderFileList();
-      renderTabs();
-      renderEditor();
-    }
-
-    function renderFileList() {
-      fileListEl.innerHTML = "";
-      files.forEach(file => {
-        const item = document.createElement("div");
-        item.className = "file-item" + (file.name === activeFileName ? " active" : "");
-
-        const info = document.createElement("div");
-        info.className = "file-info";
-        info.innerHTML = `<span class="file-badge">${getExtBadge(file.name)}</span><span>${file.name}</span>`;
-        info.onclick = () => selectFile(file.name);
-
-        const controls = document.createElement("div");
-        controls.className = "file-controls";
-
-        const renameBtn = document.createElement("button");
-        renameBtn.className = "file-ctrl-btn";
-        renameBtn.title = "Renommer";
-        renameBtn.textContent = "✎";
-        renameBtn.onclick = (e) => {
-          e.stopPropagation();
-          openRenameModal(file.name);
-        };
-
-        const delBtn = document.createElement("button");
-        delBtn.className = "file-ctrl-btn del";
-        delBtn.title = "Supprimer";
-        delBtn.textContent = "✕";
-        delBtn.onclick = (e) => {
-          e.stopPropagation();
-          deleteFile(file.name);
-        };
-
-        controls.appendChild(renameBtn);
-        controls.appendChild(delBtn);
-
-        item.appendChild(info);
-        item.appendChild(controls);
-        fileListEl.appendChild(item);
-      });
-    }
-
-    function renderTabs() {
-      tabsBarEl.innerHTML = "";
-      files.forEach(file => {
-        const tab = document.createElement("div");
-        tab.className = "tab" + (file.name === activeFileName ? " active" : "");
-        tab.innerHTML = `<span>${file.name}</span>`;
-        tab.onclick = () => selectFile(file.name);
-        tabsBarEl.appendChild(tab);
-      });
-    }
-
-    function renderEditor() {
-      const current = files.find(f => f.name === activeFileName);
-
-      if (!current) {
-        emptyStateEl.classList.remove("hidden");
-        editorContainerEl.style.display = "none";
-        headerActiveFile.textContent = "~/workspace (aucun fichier)";
-        return;
-      }
-
-      emptyStateEl.classList.add("hidden");
-      editorContainerEl.style.display = "flex";
-      headerActiveFile.textContent = `~/workspace/${current.name}`;
-
-      codeInput.value = current.content;
-      updateHighlighting();
-      updateLineNumbers();
-    }
-
-    function selectFile(name) {
-      activeFileName = name;
-      renderAll();
-    }
-
-    function deleteFile(name) {
-      files = files.filter(f => f.name !== name);
-      if (activeFileName === name) {
-        activeFileName = files.length > 0 ? files[0].name : null;
-      }
-      logToConsole(`Fichier supprimé : ${name}`, "warn");
-      renderAll();
-      runPreview();
-    }
-
-    // Coloration syntaxique & numéros de ligne
-    function updateHighlighting() {
-      const current = files.find(f => f.name === activeFileName);
-      if (!current) return;
-
-      const lang = getLangFromFilename(current.name);
-      codeHighlightContent.className = `language-${lang}`;
-      codeHighlightContent.textContent = codeInput.value + (codeInput.value.endsWith("\n") ? " " : "");
-      Prism.highlightElement(codeHighlightContent);
-    }
-
-    function updateLineNumbers() {
-      const lines = codeInput.value.split("\n").length;
-      let html = "";
-      for (let i = 1; i <= lines; i++) {
-        html += i + "<br>";
-      }
-      lineNumbersEl.innerHTML = html;
-    }
-
-    function updateCursorPosition() {
-      const textBefore = codeInput.value.substring(0, codeInput.selectionStart);
-      const lines = textBefore.split("\n");
-      const ln = lines.length;
-      const col = lines[lines.length - 1].length + 1;
-      cursorPos.textContent = `Ln ${ln}, Col ${col}`;
-    }
-
-    // Synchronisation du défilement
-    codeInput.addEventListener("scroll", () => {
-      codeHighlight.scrollTop = codeInput.scrollTop;
-      codeHighlight.scrollLeft = codeInput.scrollLeft;
-      lineNumbersEl.scrollTop = codeInput.scrollTop;
-    });
-
-    // Saisie dans l'éditeur
-    codeInput.addEventListener("input", () => {
-      const current = files.find(f => f.name === activeFileName);
-      if (!current) return;
-
-      current.content = codeInput.value;
-      updateHighlighting();
-      updateLineNumbers();
-      updateCursorPosition();
-
-      if (document.getElementById("auto-run").checked) {
-        clearTimeout(runTimeout);
-        runTimeout = setTimeout(runPreview, 350);
-      }
-    });
-
-    codeInput.addEventListener("click", updateCursorPosition);
-    codeInput.addEventListener("keyup", updateCursorPosition);
-
-    // Support de la touche Tabulation
-    codeInput.addEventListener("keydown", (e) => {
-      if (e.key === "Tab") {
-        e.preventDefault();
-        const start = codeInput.selectionStart;
-        const end = codeInput.selectionEnd;
-        codeInput.value = codeInput.value.substring(0, start) + "  " + codeInput.value.substring(end);
-        codeInput.selectionStart = codeInput.selectionEnd = start + 2;
-        codeInput.dispatchEvent(new Event("input"));
-      }
-    });
-
-    // Compilation et exécution dans l'iframe
-    function buildCombinedHTML() {
-      const htmlFile = files.find(f => f.name.toLowerCase().endsWith(".html"));
-      const cssFiles = files.filter(f => f.name.toLowerCase().endsWith(".css"));
-      const jsFiles = files.filter(f => f.name.toLowerCase().endsWith(".js"));
-
-      let html = htmlFile
-        ? htmlFile.content
-        : `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body></body></html>`;
-
-      const styles = cssFiles.map(f => `<style>/* ${f.name} */\n${f.content}</style>`).join("\n");
-
-      const consoleBridge = `
-        <script>
-          (function() {
-            const send = (type, args) => {
-              try {
-                window.parent.postMessage({
-                  source: 'cforcode-preview',
-                  type: type,
-                  message: Array.from(args).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')
-                }, '*');
-              } catch(e) {}
-            };
-            const origLog = console.log;
-            const origWarn = console.warn;
-            const origErr = console.error;
-            console.log = function() { send('info', arguments); origLog.apply(console, arguments); };
-            console.warn = function() { send('warn', arguments); origWarn.apply(console, arguments); };
-            console.error = function() { send('error', arguments); origErr.apply(console, arguments); };
-            window.onerror = function(msg, url, line) {
-              send('error', [msg + ' (ligne ' + line + ')']);
-            };
-          })();
-        <\/script>
-      `;
-
-      const scripts = jsFiles.map(f => `<script>/* ${f.name} */\n${f.content}<\/script>`).join("\n");
-
-      if (html.includes("</head>")) {
-        html = html.replace("</head>", `${styles}\n${consoleBridge}\n</head>`);
-      } else {
-        html = `${styles}\n${consoleBridge}\n${html}`;
-      }
-
-      if (html.includes("</body>")) {
-        html = html.replace("</body>", `${scripts}\n</body>`);
-      } else {
-        html = `${html}\n${scripts}`;
-      }
-
-      return html;
-    }
-
-    function runPreview() {
-      const compiled = buildCombinedHTML();
-      previewFrame.srcdoc = compiled;
-      setStatus("Aperçu mis à jour.");
-    }
-
-    window.addEventListener("message", (event) => {
-      if (event.data && event.data.source === "cforcode-preview") {
-        logToConsole(event.data.message, event.data.type);
-      }
-    });
-
-    // Importation fiable de fichiers via FileReader
-    function triggerFileImport() {
-      fileImportInput.value = "";
-      fileImportInput.click();
-    }
-
-    function processImportedFiles(fileList) {
-      if (!fileList || fileList.length === 0) return;
-
-      let loadedCount = 0;
-      const total = fileList.length;
-
-      Array.from(fileList).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const content = e.target.result;
-          const existing = files.find(f => f.name === file.name);
-          if (existing) {
-            existing.content = content;
-            logToConsole(`Fichier mis à jour : ${file.name}`, "sys");
-          } else {
-            files.push({ name: file.name, content: content });
-            logToConsole(`Fichier importé : ${file.name}`, "sys");
-          }
-          activeFileName = file.name;
-          loadedCount++;
-
-          if (loadedCount === total) {
-            renderAll();
-            runPreview();
-            setStatus(`${total} fichier(s) importé(s).`);
-          }
-        };
-        reader.onerror = () => {
-          logToConsole(`Erreur lors de la lecture de ${file.name}`, "error");
-        };
-        reader.readAsText(file);
-      });
-    }
-
-    fileImportInput.addEventListener("change", (e) => {
-      processImportedFiles(e.target.files);
-    });
-
-    // Glisser-déposer (Drag & Drop)
-    ["sidebar", "editor-pane"].forEach(id => {
-      const zone = document.getElementById(id);
-
-      zone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        zone.classList.add("drag-over");
-      });
-
-      zone.addEventListener("dragleave", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        zone.classList.remove("drag-over");
-      });
-
-      zone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        zone.classList.remove("drag-over");
-        if (e.dataTransfer && e.dataTransfer.files.length > 0) {
-          processImportedFiles(e.dataTransfer.files);
+      if (save) {
+        try {
+          localStorage.setItem(GRADIENT_STORAGE_KEY, JSON.stringify(cfg));
+          gradSaveStatus.textContent = "Sauvegardé ✓";
+        } catch (e) {
+          gradSaveStatus.textContent = "Session locale";
         }
-      });
-    });
-
-    // Gestion de la modale Création / Renommage
-    function openCreateModal() {
-      modalMode = "create";
-      modalTitle.textContent = "Créer un nouveau fichier";
-      modalFilename.value = "";
-      fileModal.classList.add("open");
-      setTimeout(() => modalFilename.focus(), 50);
+      }
     }
 
-    function openRenameModal(oldName) {
-      modalMode = "rename";
-      targetRenameFile = oldName;
-      modalTitle.textContent = `Renommer ${oldName}`;
-      modalFilename.value = oldName;
-      fileModal.classList.add("open");
-      setTimeout(() => modalFilename.focus(), 50);
-    }
-
-    function closeModal() {
-      fileModal.classList.remove("open");
-    }
-
-    function confirmModal() {
-      const rawName = modalFilename.value.trim();
-      if (!rawName) return;
-
-      if (modalMode === "create") {
-        if (files.some(f => f.name === rawName)) {
-          logToConsole(`Le fichier "${rawName}" existe déjà.`, "error");
+    function loadSavedGradient() {
+      try {
+        const raw = localStorage.getItem(GRADIENT_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          applyGradientConfig({ ...DEFAULT_GRADIENT, ...parsed }, false);
           return;
         }
-        files.push({ name: rawName, content: "" });
-        activeFileName = rawName;
-        logToConsole(`Fichier créé : ${rawName}`, "sys");
-      } else if (modalMode === "rename") {
-        const fileObj = files.find(f => f.name === targetRenameFile);
-        if (fileObj) {
-          fileObj.name = rawName;
-          if (activeFileName === targetRenameFile) {
-            activeFileName = rawName;
-          }
-          logToConsole(`Renommé : ${targetRenameFile} -> ${rawName}`, "sys");
-        }
-      }
-
-      closeModal();
-      renderAll();
-      runPreview();
+      } catch (e) {}
+      applyGradientConfig(DEFAULT_GRADIENT, false);
     }
 
-    modalFilename.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") confirmModal();
-      if (e.key === "Escape") closeModal();
-    });
-
-    // Téléchargement du projet compilé
-    function downloadProject() {
-      const fullHtml = buildCombinedHTML();
-      const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "CforCodeEditor-export.html";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      logToConsole("Projet exporté sous CforCodeEditor-export.html", "sys");
+    function handleGradientInputChange() {
+      applyGradientConfig({
+        c1: gradColor1Input.value,
+        c2: gradColor2Input.value,
+        accent: gradAccentInput.value,
+        angle: gradAngleSelect.value
+      }, true);
     }
 
-    // Changement de thème
-    document.querySelectorAll(".theme-dot").forEach(dot => {
-      dot.addEventListener("click", () => {
-        document.querySelectorAll(".theme-dot").forEach(d => d.classList.remove("active"));
-        dot.classList.add("active");
-        const theme = dot.getAttribute("data-set-theme");
-        if (theme === "green") {
-          document.body.removeAttribute("data-theme");
-        } else {
-          document.body.setAttribute("data-theme", theme);
-        }
+    gradColor1Input.addEventListener("input", handleGradientInputChange);
+    gradColor2Input.addEventListener("input", handleGradientInputChange);
+    gradAccentInput.addEventListener("input", handleGradientInputChange);
+    gradAngleSelect.addEventListener("change", handleGradientInputChange);
+
+    document.querySelectorAll(".preset-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        applyGradientConfig({
+          c1: btn.dataset.c1,
+          c2: btn.dataset.c2,
+          accent: btn.dataset.acc,
+          angle: btn.dataset.ang
+        }, true);
+        logToConsole("Préréglage de dégradé appliqué et sauvegardé.", "sys");
       });
     });
+
+    document.getElementById("btn-reset-gradient").addEventListener("click", () => {
+      try {
+        localStorage.removeItem(GRADIENT_STORAGE_KEY);
+      } catch (e) {}
+      applyGradientConfig(DEFAULT_GRADIENT, false);
+      gradSaveStatus.textContent = "Réinitialisé (défaut)";
+      logToConsole("Dégradé bleu par défaut restauré.", "sys");
+    });
+
+    document.getElementById("btn-toggle-gradient").addEventListener("click", (e) => {
+      e.stopPropagation();
+      gradientPopover.classList.toggle("open");
+    });
+
+    document.getElementById("btn-close-gradient").addEventListener("click", () => {
+      gradientPopover.classList.remove("open");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!gradientPopover.contains(e.target) && e.target.id !== "btn-toggle-gradient") {
+        gradientPopover.classList.remove("open");
+      }
+    });
+
+    // Charger le thème sauvegardé dès le démarrage
+    loadSavedGradient();
 
     // Écouteurs des boutons
     document.getElementById("btn-start-demo").addEventListener("click", () => startEditor("demo"));
