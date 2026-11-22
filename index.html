@@ -18,7 +18,7 @@
             color: #333;
             box-sizing: border-box;
             gap: 25px;
-            transition: background 0.5s ease, color 0.5s ease;
+            transition: background 0.6s ease, color 0.5s ease;
             position: relative;
             overflow-x: hidden;
         }
@@ -40,9 +40,9 @@
             opacity: 1;
         }
 
-        /* Thèmes d'arrière-plan dynamiques au survol */
+        /* Thèmes d'arrière-plan dynamiques améliorés */
         body.theme-xp {
-            background: linear-gradient(180deg, #245edb 0%, #6ea6ff 55%, #55a51c 56%, #3c800e 100%);
+            background: linear-gradient(to bottom, #3a8ee6 0%, #7db9f1 45%, #6bb83d 46%, #3a7a1c 100%);
         }
 
         body.theme-wood {
@@ -62,7 +62,7 @@
         }
 
         body.theme-agv {
-            background: linear-gradient(135deg, #e0c3fc 0%, #ff9a9e 100%);
+            background: linear-gradient(135deg, #4b134f 0%, #c94b4b 100%);
         }
 
         body.theme-portfolio {
@@ -81,6 +81,7 @@
         body.theme-wood h1,
         body.theme-matrix h1,
         body.theme-win7 h1,
+        body.theme-agv h1,
         body.theme-xp h1 {
             color: #ffffff;
             text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
@@ -327,13 +328,11 @@
 
         <h3>Apps</h3>
         <div class="button-container">
-            <!-- S'ouvre dans le même onglet (pas de target="_blank") -->
             <a href="https://cforcode.cforcode.workers.dev/app-instaler/lsf-quiz/" class="btn btn-win7" data-theme="theme-win7">lsf quiz</a>
         </div>
     </div>
 
     <script>
-        // Gestion du changement d'arrière-plan au survol des boutons
         const buttons = document.querySelectorAll('.btn[data-theme]');
         
         buttons.forEach(btn => {
@@ -351,7 +350,6 @@
             });
         });
 
-        // Animation de la pluie Matrix verte en arrière-plan
         const canvas = document.getElementById('matrix-canvas');
         const ctx = canvas.getContext('2d');
         let matrixInterval = null;
