@@ -73,16 +73,17 @@
             background-size: 24px 24px;
         }
 
-        /* Lisibilité du titre principal sur les fonds sombres */
-        body.theme-wood h1,
-        body.theme-matrix h1 {
-            color: #ffffff;
-            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+        body.theme-win7 {
+            background: radial-gradient(circle at center, #6cb2e4 0%, #124479 100%);
         }
 
+        /* Lisibilité du titre principal sur les fonds sombres */
+        body.theme-wood h1,
+        body.theme-matrix h1,
+        body.theme-win7 h1,
         body.theme-xp h1 {
             color: #ffffff;
-            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
         }
 
         .logo {
@@ -138,7 +139,6 @@
             gap: 12px;
         }
 
-        /* Style de base (bleu par défaut si non précisé) */
         .btn {
             display: flex;
             align-items: center;
@@ -157,13 +157,6 @@
 
         .btn:hover {
             transform: translateY(-2px);
-        }
-
-        .btn-disabled {
-            background-color: #cccccc !important;
-            color: #666666 !important;
-            cursor: not-allowed;
-            pointer-events: none;
         }
 
         .btn-icon {
@@ -267,6 +260,24 @@
             transform: rotate(0.5deg) scale(1.02);
         }
 
+        /* 6. Style Windows 7 (Aero Glass) */
+        .btn-win7 {
+            background: linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(210,230,250,0.5) 49%, rgba(160,200,240,0.6) 50%, rgba(120,170,220,0.8) 100%), #4b89dc;
+            border: 1px solid #3c7fb1;
+            border-radius: 16px;
+            color: #000;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            font-weight: 600;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn-win7:hover {
+            background: linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, rgba(230,245,255,0.7) 49%, rgba(180,220,255,0.8) 50%, rgba(140,190,240,0.95) 100%), #5ca2ef;
+            border-color: #1c4075;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 0 8px rgba(100,180,255,0.8);
+        }
+
         .separator {
             border: none;
             border-top: 1px solid #e0e0e0;
@@ -316,7 +327,8 @@
 
         <h3>Apps</h3>
         <div class="button-container">
-            <a href="#" class="btn btn-disabled">bientôt</a>
+            <!-- S'ouvre dans le même onglet (pas de target="_blank") -->
+            <a href="https://cforcode.cforcode.workers.dev/app-instaler/lsf-quiz/" class="btn btn-win7" data-theme="theme-win7">lsf quiz</a>
         </div>
     </div>
 
